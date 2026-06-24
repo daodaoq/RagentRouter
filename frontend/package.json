@@ -4,11 +4,11 @@
   "description": "RAgent Router - AI Cost Optimization & Smart Routing for Claude Code",
   "main": "electron/main.js",
   "scripts": {
-    "dev": "vite",
+    "start": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "vite:dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
-    "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron . --dev\"",
-    "electron:build": "vite build && electron-builder"
+    "pack": "vite build && electron-builder --dir",
+    "dist": "vite build && electron-builder"
   },
   "dependencies": {
     "@ant-design/icons": "^5.4.0",
@@ -39,6 +39,13 @@
       "dist/**/*",
       "electron/**/*",
       "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../backend",
+        "to": "backend",
+        "filter": ["**/*", "!__pycache__", "!*.db"]
+      }
     ],
     "win": {
       "target": "nsis",

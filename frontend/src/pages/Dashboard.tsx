@@ -12,9 +12,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchAll();
-    // Refresh every 30s
-    const interval = setInterval(fetchAll, 30000);
-    return () => clearInterval(interval);
   }, [fetchAll]);
 
   if (loading && !overview) {
@@ -28,7 +25,7 @@ export default function Dashboard() {
   if (!overview) {
     return (
       <Empty
-        description="No data available. Make sure the backend is running."
+        description="No data available. Is the backend running?"
         style={{ paddingTop: 120 }}
       >
         <Button type="primary" icon={<ReloadOutlined />} onClick={fetchAll}>
@@ -39,13 +36,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div>
-      <Row justify="end" style={{ marginBottom: 16 }}>
-        <Button icon={<ReloadOutlined />} onClick={fetchAll} size="small">
-          Refresh
-        </Button>
-      </Row>
-
+    <div style={{ padding: 20 }}>
       {/* Row 1: Cost Overview Cards */}
       <CostOverview overview={overview} />
 

@@ -10,118 +10,97 @@ AI Cost Optimization & Smart Routing Layer for Claude Code.
 - ✅ **Provider Adapter** — Supports Claude + DeepSeek (mock mode for demo)
 - ✅ **Rule Router** — Keyword-based automatic model selection
 - ✅ **Usage Analytics** — Track requests, tokens, and costs
-- ✅ **Dashboard** — Real-time cost overview, charts, and route history
+- ✅ **Desktop Dashboard** — Native Electron app with system tray
 
 ## Quick Start
 
-### Option 1: One-click Start (Windows)
-
-```bash
-start.bat
-```
-
-Opens two windows:
-- **Backend** → http://localhost:8000
-- **Frontend** → http://localhost:5173
-
-### Option 2: Manual Run
-
-#### Prerequisites
+### Prerequisites
 - Python 3.10+
 - Node.js 18+
 
-#### Backend
+### Launch Desktop App
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+This will:
+1. Auto-start the Python backend on port 8000
+2. Launch the Electron desktop window
+3. Show a **🟢 green dot** in the title bar when backend is online
+
+The app minimizes to the **system tray** when closed. Right-click the tray icon to quit.
+
+### API Testing
 
 ```bash
 cd backend
 pip install -r requirements.txt
 python main.py
-# → http://localhost:8000
 ```
 
-#### Frontend (Browser)
+Then:
 
 ```bash
-cd frontend
-npm install
-npm run dev
-# → http://localhost:5173
-```
-
-#### Frontend (Electron Desktop)
-
-```bash
-cd frontend
-npm install
-npm run electron:dev
-# → Launches Electron window
-```
-
-### Option 3: Docker Compose
-
-> ⚠️ **国内用户**需要先配置 Docker 镜像加速器，否则拉取镜像会失败。
-> 推荐使用 [DaoCloud 镜像](https://docs.daocloud.io/community/mirror/) 或阿里云镜像。
-
-```bash
-docker-compose up
-```
-
-Then open:
-- **Dashboard**: http://localhost:5173
-- **API Docs**: http://localhost:8000/docs
-# → Launches Electron window
-```
-
-## Test the Router
-
-Send a test request to see routing in action:
-
-```bash
-# Simple question → routed to DeepSeek (cheaper)
+# Simple question → DeepSeek (cheaper)
 curl -X POST http://localhost:8000/v1/messages \
   -H "Content-Type: application/json" \
   -d '{
     "model": "auto",
-    "messages": [{"role": "user", "content": "Explain Redis transactions"}],
+    "messages": [{"role": "user", "content": "Explain Redis"}],
     "max_tokens": 1024
   }'
 
-# Architecture task → routed to Claude (higher quality)
+# Architecture task → Claude (higher quality)
 curl -X POST http://localhost:8000/v1/messages \
   -H "Content-Type: application/json" \
   -d '{
     "model": "auto",
-    "messages": [{"role": "user", "content": "Design a distributed task scheduling system"}],
+    "messages": [{"role": "user", "content": "Design a distributed task system"}],
     "max_tokens": 1024
   }'
 ```
+
+### Build Windows Installer
+
+```bash
+cd frontend
+npm run dist
+# Output: frontend/release/RAgent Router Setup.exe
+```
+
+## Desktop App Features
+
+| Feature | Description |
+|---------|-------------|
+| Custom Title Bar | Frameless window with app-branded controls |
+| System Tray | Minimize to tray, right-click for quick actions |
+| Backend Manager | Auto-start/stop Python backend |
+| Status Bar | Real-time backend status & stats |
+| Window Persistence | Remembers position and size |
+| Single Instance | Only one window at a time |
+| Settings | Configurable port, tray behavior |
 
 ## Architecture
 
 ```
-Claude Code → CC Switch → RAgent Router → Claude / DeepSeek
-                                │
-                          ┌─────┴──────┐
-                          │  Dashboard  │
-                          │  (Electron) │
-                          └────────────┘
+┌──────────────────────────────────────┐
+│           Electron Desktop           │
+│  ┌────────┐ ┌──────┐ ┌───────────┐  │
+│  │TitleBar│ │ Tray │ │ Backend   │  │
+│  │        │ │      │ │ Manager   │  │
+│  └────────┘ └──────┘ └─────┬─────┘  │
+│                            │ spawn  │
+│  ┌────────────────────┐ ┌──▼──────┐ │
+│  │ React Dashboard    │ │ Python  │ │
+│  │ (Renderer)         │ │ FastAPI │ │
+│  └────────────────────┘ └─────────┘ │
+└──────────────────────────────────────┘
 ```
 
-## Tech Stack
-
-| Layer    | Technology                              |
-|----------|-----------------------------------------|
-| Frontend | Electron + React + TypeScript + Vite    |
-| UI       | Ant Design + Recharts                   |
-| State    | Zustand                                 |
-| Backend  | Python + FastAPI                        |
-| Database | SQLite (PostgreSQL in production)       |
-| Cache    | In-memory (Redis in production)         |
-| Deploy   | Docker Compose                          |
-
 ## Routing Rules
-
-Rules are defined by keywords and checked in priority order:
 
 | Name | Keywords | Target | Priority |
 |------|----------|--------|----------|
@@ -132,6 +111,16 @@ Rules are defined by keywords and checked in priority order:
 | Documentation | document, readme, doc, 文档 | DeepSeek | 60 |
 
 Unmatched requests default to DeepSeek (most cost-efficient).
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Desktop | Electron + React + TypeScript + Vite |
+| UI | Ant Design + Recharts + Custom CSS |
+| State | Zustand |
+| Backend | Python + FastAPI |
+| Database | SQLite |
 
 ## Roadmap
 
