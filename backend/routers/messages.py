@@ -12,7 +12,8 @@ from sqlalchemy.orm import Session
 from database import get_db
 from schemas import MessagesRequest, MessagesResponse, ContentBlock, Usage
 from services.rule_router import select_model
-from services.provider_adapter import call_claude, call_deepseek, estimate_tokens
+from services.provider_adapter import forward_to_provider, stream_to_client, estimate_tokens
+from services.provider_state import get_active_provider_id
 from services.analytics import log_request
 
 log = logging.getLogger("ragent")
@@ -65,25 +66,29 @@ async def create_message(
             content = [c.model_dump() if hasattr(c, "model_dump") else c for c in content]
         messages_dicts.append({"role": m.role, "content": content})
 
+    # Get the currently active provider from RAgent Router state
+    active_provider = get_active_provider_id()
+
     if body.model == "auto":
         route = select_model(db, user_text, system_text)
     else:
-        # Explicit model requested
         provider = "claude" if "claude" in body.model.lower() else "deepseek"
         route = {
             "provider": provider,
             "model": body.model,
+            "provider_id": active_provider,
             "rule_name": "User specified",
             "reason": f"Model explicitly set to {body.model}",
         }
 
-    # ── Call provider ──
-    if route["provider"] == "claude":
-        result = await call_claude(system_text, messages_dicts, body.max_tokens, body.stream)
-    elif route["provider"] == "deepseek":
-        result = await call_deepseek(system_text, messages_dicts, body.max_tokens, body.stream)
-    else:
-        result = await call_deepseek(system_text, messages_dicts, body.max_tokens, body.stream)
+    # ── Forward to active provider ──
+    result = await forward_to_provider(
+        active_provider,
+        system_text,
+        messages_dicts,
+        body.max_tokens,
+        body.stream,
+    )
 
     latency_ms = int((time.time() - t0) * 1000)
 
@@ -100,7 +105,7 @@ async def create_message(
     # ── Streaming ──
     if body.stream:
         return StreamingResponse(
-            _sse_generator(result["text"], route, result, latency_ms),
+            stream_to_client(active_provider, system_text, messages_dicts, body.max_tokens),
             media_type="text/event-stream",
             headers={
                 "x-ragent-model": route["model"],

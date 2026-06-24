@@ -1,33 +1,20 @@
 import { useEffect, useState } from "react";
-import { Card, Tag, Typography, Spin, Empty, Row, Col, Tooltip } from "antd";
+import { Card, Tag, Typography, Spin, Empty, Row, Col, Tooltip, Button, message, Alert } from "antd";
 import {
-  ApiOutlined,
-  LinkOutlined,
-  CheckCircleFilled,
-  StarFilled,
-  SwapOutlined,
+  ApiOutlined, LinkOutlined, CheckCircleFilled, ThunderboltOutlined,
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import PageHelp from "./PageHelp";
 
 const { Text, Title } = Typography;
 
-interface Endpoint {
-  app_type: string;
-  url: string;
-}
+interface Endpoint { app_type: string; url: string; }
 
 interface Provider {
-  id: string;
-  app_type: string;
-  name: string;
-  category: string;
-  is_current: boolean;
-  endpoints: Endpoint[];
-  cost_multiplier: string;
-  icon_color: string;
-  limit_daily_usd: string | null;
-  limit_monthly_usd: string | null;
+  id: string; app_type: string; name: string; category: string;
+  is_current: boolean; endpoints: Endpoint[];
+  cost_multiplier: string; icon_color: string;
+  limit_daily_usd: string | null; limit_monthly_usd: string | null;
 }
 
 const CATEGORY_LABELS: Record<string, { en: string; zh: string; color: string }> = {
@@ -37,9 +24,7 @@ const CATEGORY_LABELS: Record<string, { en: string; zh: string; color: string }>
 };
 
 const APP_TYPE_LABELS: Record<string, string> = {
-  claude: "Claude",
-  codex: "OpenAI",
-  gemini: "Gemini",
+  claude: "Claude", codex: "OpenAI", gemini: "Gemini",
 };
 
 export default function Providers() {
@@ -48,43 +33,53 @@ export default function Providers() {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [loading, setLoading] = useState(true);
   const [dbStatus, setDbStatus] = useState<{ available: boolean; path: string; db_size_mb: number } | null>(null);
+  const [activeId, setActiveId] = useState<string>("");
+  const [activating, setActivating] = useState<string | null>(null);
+
+  const fetchProviders = () => {
+    fetch("http://localhost:8000/api/ccswitch/providers")
+      .then(r => r.json())
+      .then(data => {
+        setProviders((data.items || []).filter((p: Provider) => p.name !== "default"));
+        setLoading(false);
+      }).catch(() => setLoading(false));
+  };
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/ccswitch/providers")
-      .then((r) => r.json())
-      .then((data) => {
-        // Filter out internal "default" providers
-        const filtered = (data.items || []).filter(
-          (p: Provider) => p.name !== "default"
-        );
-        setProviders(filtered);
-        setDbStatus({ available: data.source !== "not_found", path: data.source, db_size_mb: 0 });
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-
-    fetch("http://localhost:8000/api/ccswitch/status")
-      .then((r) => r.json())
-      .then(setDbStatus)
+    fetchProviders();
+    // Get RAgent Router's own active provider (not CC Switch's)
+    fetch("http://localhost:8000/api/proxy/current")
+      .then(r => r.json())
+      .then(d => setActiveId(d.provider_id))
       .catch(() => {});
+    fetch("http://localhost:8000/api/ccswitch/status")
+      .then(r => r.json()).then(setDbStatus).catch(() => {});
   }, []);
 
-  if (loading) {
-    return (
-      <div style={{ textAlign: "center", paddingTop: 120 }}>
-        <Spin size="large" />
-      </div>
-    );
-  }
+  const handleActivate = async (provider: Provider) => {
+    if (provider.id === activeId) return;
+    setActivating(provider.id);
+    try {
+      const res = await fetch(`http://localhost:8000/api/proxy/activate/${provider.id}`, { method: "POST" });
+      const data = await res.json();
+      if (data.success) {
+        setActiveId(provider.id);
+        message.success(
+          lang === "zh"
+            ? `已切换到 ${data.provider_name} — 即时生效`
+            : `Switched to ${data.provider_name} — active now`
+        );
+      } else {
+        message.error(data.detail || data.message || "Failed");
+      }
+    } catch {
+      message.error(lang === "zh" ? "切换失败" : "Activation failed");
+    }
+    setActivating(null);
+  };
 
-  if (!dbStatus?.available) {
-    return (
-      <Empty
-        description={lang === "zh" ? "未检测到 CC Switch 数据库" : "CC Switch database not found"}
-        style={{ paddingTop: 120 }}
-      />
-    );
-  }
+  if (loading) return <div style={{ textAlign: "center", paddingTop: 120 }}><Spin size="large" /></div>;
+  if (!dbStatus?.available) return <Empty description={t("providers.notFound")} style={{ paddingTop: 120 }} />;
 
   return (
     <div style={{ padding: 20 }}>
@@ -96,24 +91,24 @@ export default function Providers() {
         </Title>
         <Text type="secondary" style={{ fontSize: 12 }}>
           {lang === "zh" ? "数据来源: CC Switch 本地数据库" : "Data source: CC Switch local database"}
-          <Text code style={{ fontSize: 11, marginLeft: 8 }}>{dbStatus.path}</Text>
         </Text>
-        <div style={{
-          marginTop: 10, padding: "8px 12px", background: "#fefce8",
-          border: "1px solid #fde68a", borderRadius: 6, fontSize: 12, color: "#92400e",
-        }}>
-          <SwapOutlined style={{ marginRight: 6 }} />
-          {lang === "zh"
-            ? "如需切换 API 供应商，请在 CC Switch 客户端中操作。RAgent Router 只读展示配置信息，不修改 CC Switch 数据。"
-            : "To switch API providers, use the CC Switch app directly. RAgent Router displays config in read-only mode."}
-        </div>
+        <Alert
+          type="success"
+          showIcon={false}
+          icon={<ThunderboltOutlined />}
+          message={lang === "zh"
+            ? "切换即时生效 — RAgent Router 直接转发请求到选中的供应商，无需重启任何程序。"
+            : "Instant switching — RAgent Router forwards requests directly to the selected provider. No restart needed."}
+          style={{ marginTop: 10, fontSize: 12, background: "#f0fdf4", border: "1px solid #bbf7d0" }}
+        />
       </div>
 
       <Row gutter={[16, 16]}>
-        {providers.map((p) => {
+        {providers.map(p => {
           const cat = CATEGORY_LABELS[p.category] || { en: p.category, zh: p.category, color: "default" };
           const appLabel = APP_TYPE_LABELS[p.app_type] || p.app_type;
           const color = p.icon_color || "#6366f1";
+          const isActive = p.id === activeId;
 
           return (
             <Col xs={24} sm={12} lg={8} key={p.id}>
@@ -121,7 +116,7 @@ export default function Providers() {
                 bordered={false}
                 style={{
                   background: "#fff",
-                  border: p.is_current ? "2px solid #6366f1" : "1px solid #e5e7eb",
+                  border: isActive ? "2px solid #6366f1" : "1px solid #e5e7eb",
                   borderRadius: 10,
                   height: "100%",
                 }}
@@ -129,112 +124,54 @@ export default function Providers() {
               >
                 {/* Header */}
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-                  <div
-                    style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 8,
-                      background: color,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "#fff",
-                      fontSize: 16,
-                      fontWeight: 700,
-                      flexShrink: 0,
-                    }}
-                  >
-                    {p.name.charAt(0)}
-                  </div>
+                  <div style={{
+                    width: 36, height: 36, borderRadius: 8, background: color,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: "#fff", fontSize: 16, fontWeight: 700, flexShrink: 0,
+                  }}>{p.name.charAt(0)}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <Text strong style={{ color: "#374151", fontSize: 14 }}>
-                        {p.name}
-                      </Text>
-                      {p.is_current && (
-                        <Tooltip title={lang === "zh" ? "当前使用" : "Currently active"}>
-                          <StarFilled style={{ color: "#f59e0b", fontSize: 12 }} />
-                        </Tooltip>
-                      )}
-                    </div>
+                    <Text strong style={{ color: "#374151", fontSize: 14 }}>{p.name}</Text>
                     <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
                       <Tag style={{ fontSize: 10, lineHeight: "16px" }}>{appLabel}</Tag>
-                      <Tag color={cat.color} style={{ fontSize: 10, lineHeight: "16px" }}>
-                        {cat[lang]}
-                      </Tag>
+                      <Tag color={cat.color} style={{ fontSize: 10, lineHeight: "16px" }}>{cat[lang]}</Tag>
                     </div>
                   </div>
                 </div>
 
                 {/* Endpoints */}
                 {p.endpoints.length > 0 && (
-                  <div
-                    style={{
-                      background: "#f9fafb",
-                      borderRadius: 6,
-                      padding: "8px 10px",
-                      marginBottom: 12,
-                    }}
-                  >
+                  <div style={{ background: "#f9fafb", borderRadius: 6, padding: "8px 10px", marginBottom: 12 }}>
                     {p.endpoints.map((ep, i) => (
-                      <div
-                        key={i}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 6,
-                          padding: "3px 0",
-                          fontSize: 11,
-                        }}
-                      >
+                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, padding: "3px 0", fontSize: 11 }}>
                         <LinkOutlined style={{ color: "#9ca3af", fontSize: 10 }} />
-                        <Text
-                          style={{ color: "#6b7280", fontSize: 11, fontFamily: "monospace" }}
-                          ellipsis
-                        >
-                          {ep.url}
-                        </Text>
+                        <Text style={{ color: "#6b7280", fontSize: 11, fontFamily: "monospace" }} ellipsis>{ep.url}</Text>
                       </div>
                     ))}
                   </div>
                 )}
 
-                {/* Footer metadata + Activate */}
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-end",
-                    flexWrap: "wrap",
-                    gap: 8,
-                  }}
-                >
+                {/* Footer */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 8 }}>
                   <div style={{ fontSize: 11, color: "#9ca3af" }}>
-                    <span>
-                      {lang === "zh" ? "倍率" : "Multiplier"}: {p.cost_multiplier || "1.0"}x
-                    </span>
-                    {p.limit_daily_usd && (
-                      <span style={{ marginLeft: 12 }}>
-                        {lang === "zh" ? "日限额" : "Daily"}: ${p.limit_daily_usd}
-                      </span>
-                    )}
-                    {p.limit_monthly_usd && (
-                      <span style={{ marginLeft: 12 }}>
-                        {lang === "zh" ? "月限额" : "Monthly"}: ${p.limit_monthly_usd}
-                      </span>
-                    )}
+                    <span>{lang === "zh" ? "倍率" : "Multiplier"}: {p.cost_multiplier || "1.0"}x</span>
                   </div>
 
-                  <Tag
-                    color={p.is_current ? "success" : "default"}
-                    style={{ fontSize: 11, margin: 0 }}
-                  >
-                    {p.is_current ? (
-                      <><CheckCircleFilled style={{ marginRight: 4 }} />{lang === "zh" ? "当前使用中" : "Active"}</>
-                    ) : (
-                      <>{lang === "zh" ? "未启用" : "Inactive"}</>
-                    )}
-                  </Tag>
+                  {isActive ? (
+                    <Tag color="success" style={{ fontSize: 11, margin: 0 }}>
+                      <CheckCircleFilled style={{ marginRight: 4 }} />
+                      {lang === "zh" ? "当前使用中" : "Active"}
+                    </Tag>
+                  ) : (
+                    <Button
+                      type="primary" size="small"
+                      icon={<ThunderboltOutlined />}
+                      loading={activating === p.id}
+                      onClick={() => handleActivate(p)}
+                      style={{ fontSize: 11 }}
+                    >
+                      {lang === "zh" ? "启用" : "Activate"}
+                    </Button>
+                  )}
                 </div>
               </Card>
             </Col>
