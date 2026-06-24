@@ -20,10 +20,10 @@ export default function Sidebar({ active, onChange }: { active: Page; onChange: 
   const { t } = useTranslation();
 
   const navItems: NavItem[] = [
+    { key: "providers", icon: <ApiOutlined />, labelKey: "nav.providers" },
     { key: "dashboard", icon: <DashboardOutlined />, labelKey: "nav.dashboard" },
     { key: "rules", icon: <NodeIndexOutlined />, labelKey: "nav.rules" },
     { key: "test", icon: <ThunderboltOutlined />, labelKey: "nav.test" },
-    { key: "providers", icon: <ApiOutlined />, labelKey: "nav.providers" },
     { key: "settings", icon: <SettingOutlined />, labelKey: "nav.settings" },
   ];
 

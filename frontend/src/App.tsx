@@ -12,7 +12,7 @@ import { useDashboardStore } from "./stores/dashboard";
 type Page = "dashboard" | "rules" | "test" | "providers" | "settings";
 
 export default function App() {
-  const [page, setPage] = useState<Page>("dashboard");
+  const [page, setPage] = useState<Page>("providers");
   const { overview, fetchAll } = useDashboardStore();
 
   // Auto-refresh dashboard data

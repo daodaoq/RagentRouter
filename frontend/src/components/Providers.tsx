@@ -51,7 +51,11 @@ export default function Providers() {
     fetch("http://localhost:8000/api/ccswitch/providers")
       .then((r) => r.json())
       .then((data) => {
-        setProviders(data.items || []);
+        // Filter out internal "default" providers
+        const filtered = (data.items || []).filter(
+          (p: Provider) => p.name !== "default"
+        );
+        setProviders(filtered);
         setDbStatus({ available: data.source !== "not_found", path: data.source, db_size_mb: 0 });
         setLoading(false);
       })
