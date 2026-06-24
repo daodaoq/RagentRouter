@@ -34,7 +34,10 @@ def list_providers():
             "SELECT id, app_type, name, category, provider_type, is_current, "
             "in_failover_queue, cost_multiplier, limit_daily_usd, limit_monthly_usd, "
             "icon_color, notes "
-            "FROM providers ORDER BY is_current DESC, name ASC"
+            "FROM providers "
+            "WHERE name != 'default' "
+            "ORDER BY CASE WHEN category = 'cn_official' THEN 0 ELSE 1 END, "
+            "is_current DESC, name ASC"
         ).fetchall()
 
         endpoints = conn.execute(
