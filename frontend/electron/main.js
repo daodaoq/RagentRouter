@@ -28,7 +28,7 @@ let mainWindow = null;
 let tray = null;
 let backendProcess = null;
 let backendOnline = false;
-let backendPort = 8000;
+let backendPort = 15722;
 let isQuitting = false;
 let closeToTray = true;
 
@@ -55,7 +55,7 @@ function loadSettings() {
   try {
     if (fs.existsSync(SETTINGS_FILE)) return JSON.parse(fs.readFileSync(SETTINGS_FILE, "utf8"));
   } catch (e) { /* ignore */ }
-  return { backendPort: 8000, closeToTray: true, theme: "dark", autoStartBackend: true };
+  return { backendPort: 15722, closeToTray: true, theme: "dark", autoStartBackend: true };
 }
 
 function saveSettings(settings) {
@@ -87,7 +87,7 @@ function startBackend() {
   if (backendProcess) return;
 
   const settings = loadSettings();
-  backendPort = settings.backendPort || 8000;
+  backendPort = settings.backendPort || 15722;
 
   const python = getPythonPath();
   const backendDir = isDev

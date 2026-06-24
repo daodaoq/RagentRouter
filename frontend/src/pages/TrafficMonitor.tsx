@@ -45,7 +45,7 @@ interface TrendPoint {
   cost_usd: number;
 }
 
-const API = "http://localhost:8000/api/traffic";
+const API = "http://localhost:15722/api/traffic";
 
 function fmt(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";

@@ -37,7 +37,7 @@ export default function Providers() {
   const [activating, setActivating] = useState<string | null>(null);
 
   const fetchProviders = () => {
-    fetch("http://localhost:8000/api/ccswitch/providers")
+    fetch("http://localhost:15722/api/ccswitch/providers")
       .then(r => r.json())
       .then(data => {
         setProviders((data.items || []).filter((p: Provider) => p.name !== "default"));
@@ -48,11 +48,11 @@ export default function Providers() {
   useEffect(() => {
     fetchProviders();
     // Get RAgent Router's own active provider (not CC Switch's)
-    fetch("http://localhost:8000/api/proxy/current")
+    fetch("http://localhost:15722/api/proxy/current")
       .then(r => r.json())
       .then(d => setActiveId(d.provider_id))
       .catch(() => {});
-    fetch("http://localhost:8000/api/ccswitch/status")
+    fetch("http://localhost:15722/api/ccswitch/status")
       .then(r => r.json()).then(setDbStatus).catch(() => {});
   }, []);
 
@@ -60,7 +60,7 @@ export default function Providers() {
     if (provider.id === activeId) return;
     setActivating(provider.id);
     try {
-      const res = await fetch(`http://localhost:8000/api/proxy/activate/${provider.id}`, { method: "POST" });
+      const res = await fetch(`http://localhost:15722/api/proxy/activate/${provider.id}`, { method: "POST" });
       const data = await res.json();
       if (data.success) {
         setActiveId(provider.id);
