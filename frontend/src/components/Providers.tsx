@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { Card, Tag, Typography, Spin, Empty, Row, Col, Tooltip, Button, message } from "antd";
+import { Card, Tag, Typography, Spin, Empty, Row, Col, Tooltip } from "antd";
 import {
   ApiOutlined,
   LinkOutlined,
   CheckCircleFilled,
   StarFilled,
-  ThunderboltOutlined,
+  SwapOutlined,
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import PageHelp from "./PageHelp";
@@ -48,34 +48,6 @@ export default function Providers() {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [loading, setLoading] = useState(true);
   const [dbStatus, setDbStatus] = useState<{ available: boolean; path: string; db_size_mb: number } | null>(null);
-  const [activating, setActivating] = useState<string | null>(null);
-
-  const handleActivate = async (provider: Provider) => {
-    if (provider.is_current) return;
-    setActivating(provider.id);
-    try {
-      const res = await fetch(`http://localhost:8000/api/ccswitch/activate/${provider.id}`, {
-        method: "POST",
-      });
-      const data = await res.json();
-      if (data.success) {
-        message.success(
-          lang === "zh"
-            ? `已切换到 ${data.provider_name}${data.note ? "（CC Switch 可能需要重启）" : ""}`
-            : `Switched to ${data.provider_name}${data.note ? " (CC Switch may need restart)" : ""}`
-        );
-        // Refresh provider list
-        fetch("http://localhost:8000/api/ccswitch/providers")
-          .then((r) => r.json())
-          .then((d) => setProviders((d.items || []).filter((p: Provider) => p.name !== "default")));
-      } else {
-        message.error(data.error || "Failed");
-      }
-    } catch {
-      message.error(lang === "zh" ? "切换失败" : "Activation failed");
-    }
-    setActivating(null);
-  };
 
   useEffect(() => {
     fetch("http://localhost:8000/api/ccswitch/providers")
@@ -126,6 +98,15 @@ export default function Providers() {
           {lang === "zh" ? "数据来源: CC Switch 本地数据库" : "Data source: CC Switch local database"}
           <Text code style={{ fontSize: 11, marginLeft: 8 }}>{dbStatus.path}</Text>
         </Text>
+        <div style={{
+          marginTop: 10, padding: "8px 12px", background: "#fefce8",
+          border: "1px solid #fde68a", borderRadius: 6, fontSize: 12, color: "#92400e",
+        }}>
+          <SwapOutlined style={{ marginRight: 6 }} />
+          {lang === "zh"
+            ? "如需切换 API 供应商，请在 CC Switch 客户端中操作。RAgent Router 只读展示配置信息，不修改 CC Switch 数据。"
+            : "To switch API providers, use the CC Switch app directly. RAgent Router displays config in read-only mode."}
+        </div>
       </div>
 
       <Row gutter={[16, 16]}>
@@ -244,23 +225,16 @@ export default function Providers() {
                     )}
                   </div>
 
-                  {p.is_current ? (
-                    <Tag color="success" style={{ fontSize: 11, margin: 0 }}>
-                      <CheckCircleFilled style={{ marginRight: 4 }} />
-                      {lang === "zh" ? "当前使用中" : "Active"}
-                    </Tag>
-                  ) : (
-                    <Button
-                      type="primary"
-                      size="small"
-                      icon={<ThunderboltOutlined />}
-                      loading={activating === p.id}
-                      onClick={() => handleActivate(p)}
-                      style={{ fontSize: 11 }}
-                    >
-                      {lang === "zh" ? "启用" : "Activate"}
-                    </Button>
-                  )}
+                  <Tag
+                    color={p.is_current ? "success" : "default"}
+                    style={{ fontSize: 11, margin: 0 }}
+                  >
+                    {p.is_current ? (
+                      <><CheckCircleFilled style={{ marginRight: 4 }} />{lang === "zh" ? "当前使用中" : "Active"}</>
+                    ) : (
+                      <>{lang === "zh" ? "未启用" : "Inactive"}</>
+                    )}
+                  </Tag>
                 </div>
               </Card>
             </Col>
