@@ -134,6 +134,12 @@ def apply_setup():
             "UPDATE providers SET is_current = 0 WHERE app_type = 'claude' AND id != ?",
             (new_id,),
         )
+        # Also insert the endpoint URL — CC Switch reads this to route requests
+        conn.execute(
+            "INSERT INTO provider_endpoints (provider_id, app_type, url, added_at) "
+            "VALUES (?, 'claude', ?, 0)",
+            (new_id, "http://localhost:15722"),
+        )
         conn.commit()
 
         # Update settings.json
@@ -179,7 +185,8 @@ def revert_setup():
             with open(CCSWITCH_SETTINGS, "w") as f:
                 json.dump(settings, f, indent=2, ensure_ascii=False)
 
-        # Remove proxy provider
+        # Remove proxy provider and its endpoint
+        conn.execute("DELETE FROM provider_endpoints WHERE provider_id = ?", (proxy_row["id"],))
         conn.execute("DELETE FROM providers WHERE id = ?", (proxy_row["id"],))
 
         # Restore previous provider
