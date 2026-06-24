@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from database import init_db, SessionLocal
 from logger import setup_logging, get_logger, request_logger
 from models import seed_demo_data
-from routers import messages, dashboard, rules, ccswitch, traffic, proxy
+from routers import messages, dashboard, rules, ccswitch, traffic, proxy, setup
 
 # ── Init logging ───────────────────────────────────────────────────
 setup_logging()
@@ -91,6 +91,7 @@ app.include_router(rules.router)
 app.include_router(ccswitch.router)
 app.include_router(traffic.router)
 app.include_router(proxy.router)
+app.include_router(setup.router)
 
 
 @app.get("/health")

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import TitleBar from "./components/TitleBar";
 import Sidebar from "./components/Sidebar";
 import StatusBar from "./components/StatusBar";
+import SetupBanner from "./components/SetupBanner";
 import Dashboard from "./pages/Dashboard";
 import TrafficMonitor from "./pages/TrafficMonitor";
 import RuleManager from "./components/RuleManager";
@@ -36,6 +37,9 @@ export default function App() {
     >
       {/* Custom Title Bar */}
       <TitleBar />
+
+      {/* Setup banner (shown on first launch) */}
+      <SetupBanner />
 
       {/* Main body: Sidebar + Content */}
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
