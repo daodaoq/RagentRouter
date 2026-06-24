@@ -6,6 +6,7 @@ import {
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { useDashboardStore } from "../stores/dashboard";
+import PageHelp from "./PageHelp";
 import type { RouteRule } from "../api";
 import type { ColumnsType } from "antd/es/table";
 
@@ -77,7 +78,7 @@ export default function RuleManager() {
   return (
     <div style={{ padding: 20 }}>
       <Card
-        title={<span style={{ color: "#374151", fontSize: 14, fontWeight: 600 }}>{t("rules.title")} ({rules.length})</span>}
+        title={<span style={{ color: "#374151", fontSize: 14, fontWeight: 600 }}>{t("rules.title")} ({rules.length})<PageHelp page="rules" /></span>}
         extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)} size="small">{t("rules.addRule")}</Button>}
         bordered={false}
         style={{ background: "#ffffff", border: "1px solid #e5e7eb", borderRadius: 10 }}

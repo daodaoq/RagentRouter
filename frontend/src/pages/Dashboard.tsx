@@ -7,6 +7,7 @@ import CostOverview from "../components/CostOverview";
 import ModelDistribution from "../components/ModelDistribution";
 import RecentRoutes from "../components/RecentRoutes";
 import CostTrend from "../components/CostTrend";
+import PageHelp from "../components/PageHelp";
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -36,6 +37,10 @@ export default function Dashboard() {
 
   return (
     <div style={{ padding: 20 }}>
+      <div style={{ marginBottom: 16, fontSize: 16, fontWeight: 600, color: "#374151" }}>
+        📊 {t("dashboard.title")}
+        <PageHelp page="dashboard" />
+      </div>
       <CostOverview overview={overview} />
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
         <Col xs={24} lg={10}>

@@ -4,11 +4,39 @@
     "version": "v0.1"
   },
   "nav": {
+    "providers": "API 供应商",
+    "traffic": "流量监控",
     "dashboard": "仪表盘",
     "rules": "路由规则",
     "test": "测试控制台",
-    "providers": "API 供应商",
     "settings": "设置"
+  },
+  "traffic": {
+    "title": "流量监控",
+    "source": "数据来源: CC Switch 代理日志",
+    "todayRequests": "今日请求",
+    "todayTokens": "今日 Token",
+    "todayCost": "今日费用",
+    "totalCost": "累计费用",
+    "totalRequests": "累计请求",
+    "totalTokens": "累计 Token",
+    "dailyTrend": "每日费用趋势 (14天)",
+    "byModel": "按模型统计",
+    "recentRequests": "最近请求",
+    "model": "模型",
+    "requests": "请求数",
+    "cost": "费用",
+    "time": "时间",
+    "noData": "没有流量数据，CC Switch 是否已配置？",
+    "noTrendData": "暂无趋势数据"
+  },
+  "help": {
+    "providers": "在这里可以看到 CC Switch 中配置的所有 API 供应商。点击「启用」按钮可以切换 Claude Code 当前使用的 API，切换即时生效，不需要重启 Claude Code。",
+    "traffic": "展示 Claude Code 通过 CC Switch 代理产生的真实流量数据，包括 Token 消耗、费用统计和请求历史。所有数据来自 CC Switch 的代理日志，没有模拟数据。",
+    "dashboard": "查看 RAgent Router 的路由决策统计，包括请求数、Token 消耗、模型分布和费用趋势。这里展示的是 RAgent Router 自身的请求记录。",
+    "rules": "配置路由规则来控制请求自动分配到哪个模型。规则按优先级匹配，命中关键词的请求会被路由到指定的模型。未匹配的请求默认使用成本最低的模型。",
+    "test": "在这里手动发送测试消息，查看路由引擎如何根据规则选择模型。适合调试路由规则和验证路由行为。",
+    "settings": "配置 RAgent Router 的后端端口、窗口行为和自动启动等桌面应用设置。设置会自动保存到本地。"
   },
   "providers": {
     "title": "API 供应商",

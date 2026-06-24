@@ -8,6 +8,7 @@ import {
   ThunderboltOutlined,
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
+import PageHelp from "./PageHelp";
 
 const { Text, Title } = Typography;
 
@@ -119,6 +120,7 @@ export default function Providers() {
         <Title level={4} style={{ color: "#374151", marginBottom: 4 }}>
           <ApiOutlined style={{ marginRight: 8 }} />
           {lang === "zh" ? "API 供应商" : "API Providers"}
+          <PageHelp page="providers" />
         </Title>
         <Text type="secondary" style={{ fontSize: 12 }}>
           {lang === "zh" ? "数据来源: CC Switch 本地数据库" : "Data source: CC Switch local database"}

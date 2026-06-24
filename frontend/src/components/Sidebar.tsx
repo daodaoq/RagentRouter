@@ -6,9 +6,10 @@ import {
   ThunderboltOutlined,
   SettingOutlined,
   ApiOutlined,
+  BarChartOutlined,
 } from "@ant-design/icons";
 
-type Page = "dashboard" | "rules" | "test" | "providers" | "settings";
+type Page = "providers" | "traffic" | "dashboard" | "rules" | "test" | "settings";
 
 interface NavItem {
   key: Page;
@@ -21,6 +22,7 @@ export default function Sidebar({ active, onChange }: { active: Page; onChange: 
 
   const navItems: NavItem[] = [
     { key: "providers", icon: <ApiOutlined />, labelKey: "nav.providers" },
+    { key: "traffic", icon: <BarChartOutlined />, labelKey: "nav.traffic" },
     { key: "dashboard", icon: <DashboardOutlined />, labelKey: "nav.dashboard" },
     { key: "rules", icon: <NodeIndexOutlined />, labelKey: "nav.rules" },
     { key: "test", icon: <ThunderboltOutlined />, labelKey: "nav.test" },

@@ -3,6 +3,7 @@ import { Card, Input, Button, Typography, Space, Tag, Spin, Row, Col } from "ant
 import { SendOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { useDashboardStore } from "../stores/dashboard";
+import PageHelp from "./PageHelp";
 
 const { TextArea } = Input;
 const { Text, Paragraph } = Typography;
@@ -47,6 +48,7 @@ export default function TestConsole() {
       >
         <Text style={{ color: "#374151", fontSize: 14, fontWeight: 600, marginBottom: 8, display: "block" }}>
           🧪 {t("test.title")}
+          <PageHelp page="test" />
         </Text>
         <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 12 }}>
           {t("test.description")}

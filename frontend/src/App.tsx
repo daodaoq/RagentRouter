@@ -3,13 +3,14 @@ import TitleBar from "./components/TitleBar";
 import Sidebar from "./components/Sidebar";
 import StatusBar from "./components/StatusBar";
 import Dashboard from "./pages/Dashboard";
+import TrafficMonitor from "./pages/TrafficMonitor";
 import RuleManager from "./components/RuleManager";
 import TestConsole from "./components/TestConsole";
 import Providers from "./components/Providers";
 import Settings from "./components/Settings";
 import { useDashboardStore } from "./stores/dashboard";
 
-type Page = "dashboard" | "rules" | "test" | "providers" | "settings";
+type Page = "providers" | "traffic" | "dashboard" | "rules" | "test" | "settings";
 
 export default function App() {
   const [page, setPage] = useState<Page>("providers");
@@ -50,10 +51,11 @@ export default function App() {
             minWidth: 0,
           }}
         >
+          {page === "providers" && <Providers />}
+          {page === "traffic" && <TrafficMonitor />}
           {page === "dashboard" && <Dashboard />}
           {page === "rules" && <RuleManager />}
           {page === "test" && <TestConsole />}
-          {page === "providers" && <Providers />}
           {page === "settings" && <Settings />}
         </div>
       </div>

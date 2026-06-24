@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, Form, InputNumber, Switch, Button, Typography, Divider, message, Space, Tag, Descriptions } from "antd";
 import { ReloadOutlined, SaveOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
+import PageHelp from "./PageHelp";
 
 const { Text, Title } = Typography;
 
@@ -56,7 +57,7 @@ export default function Settings() {
 
   return (
     <div style={{ padding: 24, maxWidth: 640 }}>
-      <Title level={4} style={{ color: "#374151", marginBottom: 24 }}>{t("settings.title")}</Title>
+      <Title level={4} style={{ color: "#374151", marginBottom: 24 }}>{t("settings.title")}<PageHelp page="settings" /></Title>
 
       {settings && (
         <Form layout="vertical" initialValues={settings} onFinish={handleSave} style={{ maxWidth: 420 }}>
