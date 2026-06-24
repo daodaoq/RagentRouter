@@ -14,17 +14,21 @@ AI Cost Optimization & Smart Routing Layer for Claude Code.
 
 ## Quick Start
 
-### Option 1: Docker Compose (simplest)
+### Option 1: One-click Start (Windows)
 
 ```bash
-docker-compose up
+start.bat
 ```
 
-Then open:
-- **Dashboard**: http://localhost:5173
-- **API Docs**: http://localhost:8000/docs
+Opens two windows:
+- **Backend** → http://localhost:8000
+- **Frontend** → http://localhost:5173
 
 ### Option 2: Manual Run
+
+#### Prerequisites
+- Python 3.10+
+- Node.js 18+
 
 #### Backend
 
@@ -50,6 +54,21 @@ npm run dev
 cd frontend
 npm install
 npm run electron:dev
+# → Launches Electron window
+```
+
+### Option 3: Docker Compose
+
+> ⚠️ **国内用户**需要先配置 Docker 镜像加速器，否则拉取镜像会失败。
+> 推荐使用 [DaoCloud 镜像](https://docs.daocloud.io/community/mirror/) 或阿里云镜像。
+
+```bash
+docker-compose up
+```
+
+Then open:
+- **Dashboard**: http://localhost:5173
+- **API Docs**: http://localhost:8000/docs
 # → Launches Electron window
 ```
 
