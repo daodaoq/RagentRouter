@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Card, Tag, Typography, Spin, Empty, Row, Col, Tooltip } from "antd";
+import { Card, Tag, Typography, Spin, Empty, Row, Col, Tooltip, Button, message } from "antd";
 import {
   ApiOutlined,
   LinkOutlined,
   CheckCircleFilled,
   StarFilled,
+  ThunderboltOutlined,
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 
@@ -46,6 +47,34 @@ export default function Providers() {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [loading, setLoading] = useState(true);
   const [dbStatus, setDbStatus] = useState<{ available: boolean; path: string; db_size_mb: number } | null>(null);
+  const [activating, setActivating] = useState<string | null>(null);
+
+  const handleActivate = async (provider: Provider) => {
+    if (provider.is_current) return;
+    setActivating(provider.id);
+    try {
+      const res = await fetch(`http://localhost:8000/api/ccswitch/activate/${provider.id}`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (data.success) {
+        message.success(
+          lang === "zh"
+            ? `已切换到 ${data.provider_name}${data.note ? "（CC Switch 可能需要重启）" : ""}`
+            : `Switched to ${data.provider_name}${data.note ? " (CC Switch may need restart)" : ""}`
+        );
+        // Refresh provider list
+        fetch("http://localhost:8000/api/ccswitch/providers")
+          .then((r) => r.json())
+          .then((d) => setProviders((d.items || []).filter((p: Provider) => p.name !== "default")));
+      } else {
+        message.error(data.error || "Failed");
+      }
+    } catch {
+      message.error(lang === "zh" ? "切换失败" : "Activation failed");
+    }
+    setActivating(null);
+  };
 
   useEffect(() => {
     fetch("http://localhost:8000/api/ccswitch/providers")
@@ -187,29 +216,48 @@ export default function Providers() {
                   </div>
                 )}
 
-                {/* Footer metadata */}
+                {/* Footer metadata + Activate */}
                 <div
                   style={{
                     display: "flex",
                     justifyContent: "space-between",
+                    alignItems: "flex-end",
                     flexWrap: "wrap",
                     gap: 8,
-                    fontSize: 11,
-                    color: "#9ca3af",
                   }}
                 >
-                  <span>
-                    {lang === "zh" ? "倍率" : "Multiplier"}: {p.cost_multiplier || "1.0"}x
-                  </span>
-                  {p.limit_daily_usd && (
+                  <div style={{ fontSize: 11, color: "#9ca3af" }}>
                     <span>
-                      {lang === "zh" ? "日限额" : "Daily"}: ${p.limit_daily_usd}
+                      {lang === "zh" ? "倍率" : "Multiplier"}: {p.cost_multiplier || "1.0"}x
                     </span>
-                  )}
-                  {p.limit_monthly_usd && (
-                    <span>
-                      {lang === "zh" ? "月限额" : "Monthly"}: ${p.limit_monthly_usd}
-                    </span>
+                    {p.limit_daily_usd && (
+                      <span style={{ marginLeft: 12 }}>
+                        {lang === "zh" ? "日限额" : "Daily"}: ${p.limit_daily_usd}
+                      </span>
+                    )}
+                    {p.limit_monthly_usd && (
+                      <span style={{ marginLeft: 12 }}>
+                        {lang === "zh" ? "月限额" : "Monthly"}: ${p.limit_monthly_usd}
+                      </span>
+                    )}
+                  </div>
+
+                  {p.is_current ? (
+                    <Tag color="success" style={{ fontSize: 11, margin: 0 }}>
+                      <CheckCircleFilled style={{ marginRight: 4 }} />
+                      {lang === "zh" ? "当前使用中" : "Active"}
+                    </Tag>
+                  ) : (
+                    <Button
+                      type="primary"
+                      size="small"
+                      icon={<ThunderboltOutlined />}
+                      loading={activating === p.id}
+                      onClick={() => handleActivate(p)}
+                      style={{ fontSize: 11 }}
+                    >
+                      {lang === "zh" ? "启用" : "Activate"}
+                    </Button>
                   )}
                 </div>
               </Card>
