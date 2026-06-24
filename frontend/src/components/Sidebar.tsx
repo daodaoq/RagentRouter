@@ -1,7 +1,6 @@
 import { Tooltip } from "antd";
 import { useTranslation } from "react-i18next";
 import {
-  DashboardOutlined,
   NodeIndexOutlined,
   ThunderboltOutlined,
   SettingOutlined,
@@ -9,7 +8,7 @@ import {
   BarChartOutlined,
 } from "@ant-design/icons";
 
-type Page = "providers" | "traffic" | "dashboard" | "rules" | "test" | "settings";
+type Page = "providers" | "traffic" | "rules" | "test" | "settings";
 
 interface NavItem {
   key: Page;
@@ -23,7 +22,6 @@ export default function Sidebar({ active, onChange }: { active: Page; onChange: 
   const navItems: NavItem[] = [
     { key: "providers", icon: <ApiOutlined />, labelKey: "nav.providers" },
     { key: "traffic", icon: <BarChartOutlined />, labelKey: "nav.traffic" },
-    { key: "dashboard", icon: <DashboardOutlined />, labelKey: "nav.dashboard" },
     { key: "rules", icon: <NodeIndexOutlined />, labelKey: "nav.rules" },
     { key: "test", icon: <ThunderboltOutlined />, labelKey: "nav.test" },
     { key: "settings", icon: <SettingOutlined />, labelKey: "nav.settings" },

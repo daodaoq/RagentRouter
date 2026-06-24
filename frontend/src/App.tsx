@@ -3,26 +3,37 @@ import TitleBar from "./components/TitleBar";
 import Sidebar from "./components/Sidebar";
 import StatusBar from "./components/StatusBar";
 import SetupBanner from "./components/SetupBanner";
-import Dashboard from "./pages/Dashboard";
 import TrafficMonitor from "./pages/TrafficMonitor";
 import RuleManager from "./components/RuleManager";
 import TestConsole from "./components/TestConsole";
 import Providers from "./components/Providers";
 import Settings from "./components/Settings";
-import { useDashboardStore } from "./stores/dashboard";
 
-type Page = "providers" | "traffic" | "dashboard" | "rules" | "test" | "settings";
+type Page = "providers" | "traffic" | "rules" | "test" | "settings";
 
 export default function App() {
   const [page, setPage] = useState<Page>("providers");
-  const { overview, fetchAll } = useDashboardStore();
+  const [trafficStats, setTrafficStats] = useState({ requests: 0, todayCost: 0 });
 
-  // Auto-refresh dashboard data
+  // Fetch real traffic stats for status bar
   useEffect(() => {
-    fetchAll();
-    const interval = setInterval(fetchAll, 15000);
+    const fetchStatus = () => {
+      fetch("http://localhost:15722/api/traffic/overview")
+        .then(r => r.json())
+        .then(data => {
+          if (data.available) {
+            setTrafficStats({
+              requests: data.total?.requests ?? 0,
+              todayCost: data.today?.cost_usd ?? 0,
+            });
+          }
+        })
+        .catch(() => {});
+    };
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 30_000);
     return () => clearInterval(interval);
-  }, [fetchAll]);
+  }, []);
 
   return (
     <div
@@ -57,7 +68,6 @@ export default function App() {
         >
           {page === "providers" && <Providers />}
           {page === "traffic" && <TrafficMonitor />}
-          {page === "dashboard" && <Dashboard />}
           {page === "rules" && <RuleManager />}
           {page === "test" && <TestConsole />}
           {page === "settings" && <Settings />}
@@ -66,8 +76,8 @@ export default function App() {
 
       {/* Status Bar */}
       <StatusBar
-        requestCount={overview?.total_requests}
-        todayCost={overview?.today_cost}
+        requestCount={trafficStats.requests}
+        todayCost={trafficStats.todayCost}
       />
     </div>
   );

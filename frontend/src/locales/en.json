@@ -20,7 +20,7 @@
     "totalCost": "Total Cost",
     "totalRequests": "Total Requests",
     "totalTokens": "Total Tokens",
-    "dailyTrend": "Daily Cost Trend (14 days)",
+    "dailyTrend": "Daily Trend (14 days)",
     "byModel": "By Model",
     "recentRequests": "Recent Requests",
     "model": "Model",
@@ -28,15 +28,26 @@
     "cost": "Cost",
     "time": "Time",
     "noData": "No traffic data available. Is CC Switch configured?",
-    "noTrendData": "No trend data yet"
+    "noTrendData": "No trend data yet",
+    "cacheHit": "Cache Hit",
+    "totalCacheHit": "Total Cache",
+    "errorRate": "Error Rate",
+    "lastHours": "in last {{hours}}h",
+    "latency": "Latency",
+    "avgLatency": "Avg",
+    "minLatency": "Min",
+    "maxLatency": "Max",
+    "latencyStats": "Latency by Model",
+    "autoRefresh": "Auto-refresh",
+    "refresh": "Refresh"
   },
   "help": {
     "providers": "View all API providers configured in CC Switch. Click 'Activate' to switch Claude Code's current API provider — the change takes effect immediately without restarting Claude Code.",
-    "traffic": "Real traffic data from Claude Code via CC Switch proxy, including token consumption, cost statistics, and request history. All data comes from CC Switch's proxy logs — no simulated data.",
+    "traffic": "Real-time traffic monitoring from CC Switch proxy logs. View token consumption, cost, cache hits, error rates, latency stats, and request history. Auto-refreshes every 30 seconds. All data is real — no simulated data.",
     "dashboard": "View RAgent Router's routing decision statistics, including request count, token consumption, model distribution, and cost trends. Shows RAgent Router's own request records.",
     "rules": "Configure routing rules to automatically assign requests to specific models. Rules are matched by priority — requests with matching keywords are routed to the specified model. Unmatched requests default to the cheapest model.",
     "test": "Manually send test messages to see how the routing engine selects models. Useful for debugging routing rules and verifying routing behavior.",
-    "settings": "Configure RAgent Router's backend port, window behavior, auto-start, and other desktop app settings. Settings are saved locally."
+    "settings": "System status overview, CC Switch proxy configuration, appearance settings (theme/language), backend service configuration, log paths, and application information."
   },
   "providers": {
     "title": "API Providers",

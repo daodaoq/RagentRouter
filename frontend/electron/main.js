@@ -409,6 +409,11 @@ function setupIPC() {
   ipcMain.handle("show-message-box", (_e, options) => {
     return dialog.showMessageBox(mainWindow, options);
   });
+
+  // Open folder in file explorer
+  ipcMain.handle("show-item-in-folder", (_e, folderPath) => {
+    return require("electron").shell.openPath(folderPath);
+  });
 }
 
 // ── App Lifecycle ─────────────────────────────────────────────────

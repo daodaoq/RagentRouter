@@ -29,6 +29,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   // ── Dialog ───────────────────────────────────────────────────
   showMessageBox: (opts) => ipcRenderer.invoke("show-message-box", opts),
+  showItemInFolder: (path) => ipcRenderer.invoke("show-item-in-folder", path),
 
   // ── Platform ─────────────────────────────────────────────────
   platform: process.platform,

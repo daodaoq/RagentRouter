@@ -173,7 +173,8 @@ def daily_trend(days: int = Query(default=14, le=90)):
         return {"available": False, "points": []}
 
     rows = conn.execute("""
-        SELECT created_at, CAST(total_cost_usd AS REAL) as tc
+        SELECT created_at, input_tokens, output_tokens,
+               cache_read_tokens, CAST(total_cost_usd AS REAL) as tc
         FROM proxy_request_logs ORDER BY created_at ASC
     """).fetchall()
 
@@ -185,9 +186,15 @@ def daily_trend(days: int = Query(default=14, le=90)):
             continue
         day = ts.strftime("%m-%d")
         if day not in daily:
-            daily[day] = {"date": day, "requests": 0, "cost_usd": 0.0}
+            daily[day] = {
+                "date": day, "requests": 0, "cost_usd": 0.0,
+                "input_tokens": 0, "output_tokens": 0, "cache_read_tokens": 0,
+            }
         daily[day]["requests"] += 1
         daily[day]["cost_usd"] += r["tc"] or 0
+        daily[day]["input_tokens"] += r["input_tokens"] or 0
+        daily[day]["output_tokens"] += r["output_tokens"] or 0
+        daily[day]["cache_read_tokens"] += r["cache_read_tokens"] or 0
 
     sorted_days = sorted(daily.values(), key=lambda d: d["date"])[-days:]
     for d in sorted_days:
@@ -197,12 +204,91 @@ def daily_trend(days: int = Query(default=14, le=90)):
     return {"available": True, "points": sorted_days}
 
 
+@router.get("/errors")
+def traffic_errors(hours: int = Query(default=24, le=720)):
+    """Error rate stats — failed vs successful requests over recent hours."""
+    conn = _get_db()
+    if not conn:
+        return {"available": False, "items": []}
+
+    now = _local_now()
+    since = int(now.timestamp()) - hours * 3600
+
+    rows = conn.execute("""
+        SELECT status_code, COUNT(*) as cnt
+        FROM proxy_request_logs
+        WHERE created_at >= ?
+        GROUP BY status_code ORDER BY cnt DESC
+    """, (since,)).fetchall()
+
+    total = sum(r["cnt"] for r in rows)
+    errors = sum(r["cnt"] for r in rows if r["status_code"] and r["status_code"] != 200)
+    error_rate = round(errors / total * 100, 2) if total > 0 else 0
+
+    conn.close()
+    return {
+        "available": True,
+        "hours": hours,
+        "total": total,
+        "errors": errors,
+        "error_rate": error_rate,
+        "by_status": [{"status_code": r["status_code"], "count": r["cnt"]} for r in rows],
+    }
+
+
+@router.get("/latency")
+def traffic_latency(hours: int = Query(default=24, le=720)):
+    """Latency stats by model."""
+    conn = _get_db()
+    if not conn:
+        return {"available": False, "items": []}
+
+    now = _local_now()
+    since = int(now.timestamp()) - hours * 3600
+
+    rows = conn.execute("""
+        SELECT model,
+            COUNT(*) as cnt,
+            AVG(latency_ms) as avg_ms,
+            MIN(latency_ms) as min_ms,
+            MAX(latency_ms) as max_ms
+        FROM proxy_request_logs
+        WHERE created_at >= ? AND latency_ms IS NOT NULL
+        GROUP BY model ORDER BY avg_ms DESC
+    """, (since,)).fetchall()
+
+    conn.close()
+    return {
+        "available": True,
+        "hours": hours,
+        "items": [
+            {
+                "model": r["model"],
+                "requests": r["cnt"],
+                "avg_ms": round(r["avg_ms"], 1) if r["avg_ms"] else 0,
+                "min_ms": r["min_ms"] or 0,
+                "max_ms": r["max_ms"] or 0,
+            }
+            for r in rows
+        ],
+    }
+
+
 @router.get("/status")
 def traffic_status():
     exists = os.path.exists(CCSWITCH_DB)
     count = 0
+    last_ts = None
     if exists:
         conn = sqlite3.connect(f"file:{CCSWITCH_DB}?mode=ro", uri=True)
         count = conn.execute("SELECT COUNT(*) FROM proxy_request_logs").fetchone()[0]
+        row = conn.execute(
+            "SELECT created_at FROM proxy_request_logs ORDER BY created_at DESC LIMIT 1"
+        ).fetchone()
+        if row:
+            try:
+                last_ts = _to_timestamp(row["created_at"]).astimezone(LOCAL_TZ).strftime("%Y-%m-%d %H:%M:%S")
+            except Exception:
+                pass
         conn.close()
-    return {"available": exists and count > 0, "total_records": count}
+    return {"available": exists and count > 0, "total_records": count, "last_request": last_ts}
