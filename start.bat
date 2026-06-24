@@ -1,23 +1,37 @@
 @echo off
 echo ==========================================
-echo   RAgent Router - Starting...
+echo   RAgent Router v0.1.0
 echo ==========================================
 echo.
+echo Choose launch mode:
+echo   [1] Browser  (http://localhost:5173^)
+echo   [2] Desktop  (Electron window^)
+echo.
+set /p choice="Enter 1 or 2: "
 
-REM Use Python 3.14 from the installed location
 set PYTHON=C:\Users\songjunkui\AppData\Local\Programs\Python\Python314\python.exe
 
-echo [1/2] Starting backend (FastAPI) on port 8000...
+echo.
+echo Starting backend...
 start "RAgent-Backend" cmd /c "cd /d %~dp0backend && %PYTHON% -m uvicorn main:app --host 0.0.0.0 --port 8000"
+echo Backend starting on http://localhost:8000
 
-echo [2/2] Starting frontend (Vite) on port 5173...
-start "RAgent-Frontend" cmd /c "cd /d %~dp0frontend && npx vite --host"
+if "%choice%"=="2" goto desktop
 
-echo.
-echo ==========================================
-echo   Backend:  http://localhost:8000/docs
-echo   Frontend: http://localhost:5173
-echo ==========================================
-echo.
-echo Close this window or press Ctrl+C in each window to stop.
+:browser
+echo Starting frontend (Browser)...
+timeout /t 3 /nobreak >nul
+cd /d %~dp0frontend
+npx vite --host
+goto end
+
+:desktop
+echo Starting frontend (Electron Desktop)...
+echo Waiting for backend + Vite dev server...
+timeout /t 3 /nobreak >nul
+cd /d %~dp0frontend
+npm run electron:dev
+goto end
+
+:end
 pause
