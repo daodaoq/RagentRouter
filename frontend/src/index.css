@@ -26,6 +26,23 @@
   --statusbar-height: 32px;
 }
 
+[data-theme="dark"] {
+  --bg-primary: #0a0a1a;
+  --bg-secondary: #0e0e24;
+  --bg-card: #141428;
+  --bg-elevated: #1a1a35;
+  --border-color: #1a1a40;
+  --border-light: #2a2a45;
+  --text-primary: #e0e0e0;
+  --text-secondary: #888;
+  --text-muted: #555;
+  --accent: #818cf8;
+  --accent-light: #a5b4fc;
+  --green: #34d399;
+  --red: #f87171;
+  --orange: #fbbf24;
+}
+
 html, body, #root {
   height: 100%;
   width: 100%;
