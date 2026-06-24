@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import uuid
 from datetime import datetime, timezone, timedelta
 
@@ -8,6 +9,8 @@ from sqlalchemy.orm import Session
 
 from models import RequestLog
 from services.provider_adapter import COST_RATES
+
+req_logger = logging.getLogger("ragent.request")
 
 
 def log_request(
@@ -30,9 +33,9 @@ def log_request(
         6,
     )
 
-    log = RequestLog(
+    record = RequestLog(
         id=uuid.uuid4().hex[:12],
-        prompt=prompt[:500],  # Truncate for storage
+        prompt=prompt[:500],
         prompt_tokens=prompt_tokens,
         completion_tokens=completion_tokens,
         total_tokens=total_tokens,
@@ -42,10 +45,21 @@ def log_request(
         cost_usd=cost,
         latency_ms=latency_ms,
     )
-    db.add(log)
+    db.add(record)
     db.commit()
-    db.refresh(log)
-    return log
+    db.refresh(record)
+
+    req_logger.info(
+        "RECORD | %-16s | in=%-5d out=%-5d | $%.5f | %dms | %s",
+        model,
+        prompt_tokens,
+        completion_tokens,
+        cost,
+        latency_ms,
+        route_reason,
+    )
+
+    return record
 
 
 def get_cost_overview(db: Session) -> dict:

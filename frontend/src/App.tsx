@@ -43,8 +43,10 @@ export default function App() {
         <div
           style={{
             flex: 1,
-            overflow: "auto",
+            overflowX: "hidden",
+            overflowY: "auto",
             background: "#f8f9fa",
+            minWidth: 0,
           }}
         >
           {page === "dashboard" && <Dashboard />}

@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import logging
 import re
 from typing import TYPE_CHECKING
 
 from sqlalchemy.orm import Session
 
 from models import RouteRule
+
+log = logging.getLogger("ragent.route")
 
 if TYPE_CHECKING:
     pass
@@ -37,6 +40,7 @@ def select_model(
         for kw in keywords:
             # Simple keyword matching (case-insensitive)
             if kw.lower() in combined_lower:
+                log.info("MATCH  | rule=%-24s | keyword=%-12s | → %s", rule.name, kw, rule.target_model)
                 return {
                     "provider": rule.target_model,
                     "model": _resolve_model_name(rule.target_model),
@@ -46,6 +50,7 @@ def select_model(
                 }
 
     # Fallback
+    log.debug("FALLBACK | no rule matched → deepseek")
     return {
         "provider": "deepseek",
         "model": "deepseek-chat",

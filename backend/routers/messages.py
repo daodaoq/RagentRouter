@@ -3,6 +3,7 @@
 import uuid
 import time
 import json
+import logging
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
@@ -13,6 +14,8 @@ from schemas import MessagesRequest, MessagesResponse, ContentBlock, Usage
 from services.rule_router import select_model
 from services.provider_adapter import call_claude, call_deepseek, estimate_tokens
 from services.analytics import log_request
+
+log = logging.getLogger("ragent")
 
 router = APIRouter(prefix="/v1", tags=["Messages"])
 
@@ -83,6 +86,16 @@ async def create_message(
         result = await call_deepseek(system_text, messages_dicts, body.max_tokens, body.stream)
 
     latency_ms = int((time.time() - t0) * 1000)
+
+    # ── Log routing decision ──
+    log.info(
+        "ROUTE | prompt=%-50s | → %-16s | %s | %dms | $%.5f",
+        user_text[:50].replace("\n", " "),
+        route["model"],
+        route.get("reason", ""),
+        latency_ms,
+        result.get("input_tokens", 0) / 1_000_000 * 3.0 + result.get("output_tokens", 0) / 1_000_000 * 15.0,
+    )
 
     # ── Streaming ──
     if body.stream:

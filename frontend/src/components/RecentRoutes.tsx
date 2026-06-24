@@ -80,6 +80,7 @@ export default function RecentRoutes() {
         columns={columns}
         rowKey="id"
         size="small"
+        scroll={{ x: 880 }}
         pagination={{ pageSize: 8, size: "small" }}
         locale={{ emptyText: t("dashboard.noRoutes") }}
       />

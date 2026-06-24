@@ -84,6 +84,9 @@ html, body, #root {
 .ant-table-tbody > tr:hover > td {
   background: rgba(99, 102, 241, 0.04) !important;
 }
+.ant-table-content {
+  overflow-x: auto !important;
+}
 .ant-card {
   background: var(--bg-card) !important;
   border-color: var(--border-light) !important;

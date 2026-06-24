@@ -91,6 +91,7 @@ export default function RuleManager() {
           columns={columns}
           rowKey="id"
           size="small"
+          scroll={{ x: 780 }}
           pagination={false}
           locale={{ emptyText: t("rules.empty") }}
         />
