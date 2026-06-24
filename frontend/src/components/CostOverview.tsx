@@ -1,10 +1,5 @@
 import { Card, Row, Col, Statistic } from "antd";
-import {
-  DollarOutlined,
-  RiseOutlined,
-  SaveOutlined,
-  BarChartOutlined,
-} from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 import type { CostOverview as CostOverviewType } from "../api";
 
 interface Props {
@@ -12,37 +7,35 @@ interface Props {
 }
 
 export default function CostOverview({ overview }: Props) {
+  const { t } = useTranslation();
+
   const cards = [
     {
-      title: "Today's Cost",
+      title: t("dashboard.todayCost"),
       value: overview.today_cost,
       prefix: "$",
-      icon: <DollarOutlined />,
-      color: "#6c5ce7",
+      color: "#6366f1",
       precision: 2,
     },
     {
-      title: "Month Cost",
+      title: t("dashboard.monthCost"),
       value: overview.month_cost,
       prefix: "$",
-      icon: <BarChartOutlined />,
-      color: "#00b894",
+      color: "#10b981",
       precision: 2,
     },
     {
-      title: "Saved",
+      title: t("dashboard.saved"),
       value: overview.saved_amount,
       prefix: "$",
-      icon: <SaveOutlined />,
-      color: "#00cec9",
+      color: "#06b6d4",
       precision: 2,
     },
     {
-      title: "Saving Rate",
+      title: t("dashboard.savingRate"),
       value: overview.saving_rate,
       suffix: "%",
-      icon: <RiseOutlined />,
-      color: "#fd79a8",
+      color: "#f59e0b",
       precision: 1,
     },
   ];
@@ -61,35 +54,13 @@ export default function CostOverview({ overview }: Props) {
             }}
           >
             <Statistic
-              title={
-                <span style={{ color: "#6b7280", fontSize: 12, fontWeight: 500 }}>{card.title}</span>
-              }
+              title={<span style={{ color: "#6b7280", fontSize: 12, fontWeight: 500 }}>{card.title}</span>}
               value={card.value}
               precision={card.precision}
               suffix={card.suffix}
-              valueStyle={{
-                color: card.color,
-                fontSize: 28,
-                fontWeight: 700,
-              }}
-              prefix={
-                <span style={{ color: card.color, fontSize: 22 }}>
-                  {card.prefix}
-                </span>
-              }
+              valueStyle={{ color: card.color, fontSize: 28, fontWeight: 700 }}
+              prefix={<span style={{ color: card.color, fontSize: 22 }}>{card.prefix}</span>}
             />
-            <div
-              style={{
-                position: "absolute",
-                top: 16,
-                right: 16,
-                color: card.color,
-                opacity: 0.3,
-                fontSize: 28,
-              }}
-            >
-              {card.icon}
-            </div>
           </Card>
         </Col>
       ))}
@@ -104,15 +75,9 @@ export default function CostOverview({ overview }: Props) {
           }}
         >
           <Statistic
-            title={
-              <span style={{ color: "#6b7280", fontSize: 12, fontWeight: 500 }}>Total Requests</span>
-            }
+            title={<span style={{ color: "#6b7280", fontSize: 12, fontWeight: 500 }}>{t("dashboard.totalRequests")}</span>}
             value={overview.total_requests}
-            valueStyle={{
-              color: "#ffeaa7",
-              fontSize: 28,
-              fontWeight: 700,
-            }}
+            valueStyle={{ color: "#374151", fontSize: 28, fontWeight: 700 }}
           />
         </Card>
       </Col>

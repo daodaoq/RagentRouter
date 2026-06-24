@@ -1,4 +1,5 @@
 import { Tooltip } from "antd";
+import { useTranslation } from "react-i18next";
 import {
   DashboardOutlined,
   NodeIndexOutlined,
@@ -11,22 +12,19 @@ type Page = "dashboard" | "rules" | "test" | "settings";
 interface NavItem {
   key: Page;
   icon: React.ReactNode;
-  label: string;
+  labelKey: string;
 }
 
-const navItems: NavItem[] = [
-  { key: "dashboard", icon: <DashboardOutlined />, label: "Dashboard" },
-  { key: "rules", icon: <NodeIndexOutlined />, label: "Route Rules" },
-  { key: "test", icon: <ThunderboltOutlined />, label: "Test Console" },
-  { key: "settings", icon: <SettingOutlined />, label: "Settings" },
-];
+export default function Sidebar({ active, onChange }: { active: Page; onChange: (p: Page) => void }) {
+  const { t } = useTranslation();
 
-interface Props {
-  active: Page;
-  onChange: (page: Page) => void;
-}
+  const navItems: NavItem[] = [
+    { key: "dashboard", icon: <DashboardOutlined />, labelKey: "nav.dashboard" },
+    { key: "rules", icon: <NodeIndexOutlined />, labelKey: "nav.rules" },
+    { key: "test", icon: <ThunderboltOutlined />, labelKey: "nav.test" },
+    { key: "settings", icon: <SettingOutlined />, labelKey: "nav.settings" },
+  ];
 
-export default function Sidebar({ active, onChange }: Props) {
   return (
     <div
       style={{
@@ -44,7 +42,7 @@ export default function Sidebar({ active, onChange }: Props) {
       {navItems.map((item) => {
         const isActive = active === item.key;
         return (
-          <Tooltip key={item.key} title={item.label} placement="right" mouseEnterDelay={0.5}>
+          <Tooltip key={item.key} title={t(item.labelKey)} placement="right" mouseEnterDelay={0.5}>
             <button
               onClick={() => onChange(item.key)}
               style={{
@@ -94,19 +92,9 @@ export default function Sidebar({ active, onChange }: Props) {
           </Tooltip>
         );
       })}
-
       <div style={{ flex: 1 }} />
-
-      <div
-        style={{
-          paddingBottom: 14,
-          fontSize: 9,
-          color: "#d1d5db",
-          fontWeight: 600,
-          letterSpacing: 1,
-        }}
-      >
-        v0.1
+      <div style={{ paddingBottom: 14, fontSize: 9, color: "#d1d5db", fontWeight: 600, letterSpacing: 1 }}>
+        {t("app.version")}
       </div>
     </div>
   );

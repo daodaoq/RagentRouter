@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 
 // @ts-ignore - injected by preload
 const api = window.electronAPI;
 
 export default function TitleBar() {
+  const { t } = useTranslation();
   const [maximized, setMaximized] = useState(false);
   const [backendOnline, setBackendOnline] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
+
+  const currentLang = i18n.language.startsWith("zh") ? "zh" : "en";
 
   useEffect(() => {
     if (!api) return;
@@ -14,6 +20,11 @@ export default function TitleBar() {
     api.getBackendStatus().then((s: { online: boolean }) => setBackendOnline(s.online));
     api.onBackendStatus((s: { online: boolean }) => setBackendOnline(s.online));
   }, []);
+
+  const switchLang = (lng: string) => {
+    i18n.changeLanguage(lng);
+    setLangOpen(false);
+  };
 
   const btnBase: React.CSSProperties = {
     width: 46,
@@ -63,7 +74,7 @@ export default function TitleBar() {
           R
         </div>
         <span style={{ color: "#374151", fontSize: 12, fontWeight: 600, letterSpacing: "-0.2px" }}>
-          RAgent Router
+          {t("app.title")}
         </span>
         <span
           style={{
@@ -73,8 +84,89 @@ export default function TitleBar() {
             background: backendOnline ? "#10b981" : "#ef4444",
             transition: "background 0.3s",
           }}
-          title={backendOnline ? "Backend Online" : "Backend Offline"}
+          title={backendOnline ? t("titlebar.backendOnline") : t("titlebar.backendOffline")}
         />
+      </div>
+
+      {/* Center: drag region */}
+      <div style={{ flex: 1 }} />
+
+      {/* Language Switcher */}
+      <div className="titlebar-no-drag" style={{ position: "relative", marginRight: 4 }}>
+        <button
+          onClick={() => setLangOpen(!langOpen)}
+          style={{
+            ...btnBase,
+            width: 36,
+            fontSize: 11,
+            fontWeight: 600,
+            color: "#6b7280",
+            background: langOpen ? "#f3f4f6" : "transparent",
+            borderRadius: 6,
+          }}
+          onMouseEnter={(e) => {
+            if (!langOpen) e.currentTarget.style.background = "#f3f4f6";
+          }}
+          onMouseLeave={(e) => {
+            if (!langOpen) e.currentTarget.style.background = "transparent";
+          }}
+          title={t("language.switch")}
+        >
+          {currentLang === "zh" ? "中" : "EN"}
+        </button>
+        {langOpen && (
+          <>
+            <div
+              style={{ position: "fixed", inset: 0, zIndex: 1 }}
+              onClick={() => setLangOpen(false)}
+            />
+            <div
+              style={{
+                position: "absolute",
+                top: 40,
+                right: 0,
+                background: "#fff",
+                border: "1px solid #e5e7eb",
+                borderRadius: 8,
+                boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+                zIndex: 200,
+                overflow: "hidden",
+                minWidth: 120,
+              }}
+            >
+              {[
+                { key: "zh", label: "🇨🇳 中文" },
+                { key: "en", label: "🇺🇸 English" },
+              ].map((item) => (
+                <button
+                  key={item.key}
+                  onClick={() => switchLang(item.key)}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    padding: "8px 14px",
+                    border: "none",
+                    background: currentLang === item.key ? "#eef2ff" : "transparent",
+                    color: currentLang === item.key ? "#6366f1" : "#374151",
+                    cursor: "pointer",
+                    fontSize: 12,
+                    textAlign: "left",
+                    outline: "none",
+                    fontWeight: currentLang === item.key ? 600 : 400,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (currentLang !== item.key) e.currentTarget.style.background = "#f9fafb";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (currentLang !== item.key) e.currentTarget.style.background = "transparent";
+                  }}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Right: Window Controls */}
@@ -84,7 +176,7 @@ export default function TitleBar() {
           onClick={() => api?.minimize()}
           onMouseEnter={(e) => (e.currentTarget.style.background = "#f3f4f6")}
           onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-          title="Minimize"
+          title={t("titlebar.minimize")}
         >
           <svg width="12" height="12" viewBox="0 0 12 12">
             <rect x="1" y="5.5" width="10" height="1" rx="0.5" fill="currentColor" />
@@ -96,7 +188,7 @@ export default function TitleBar() {
           onClick={() => api?.maximize()}
           onMouseEnter={(e) => (e.currentTarget.style.background = "#f3f4f6")}
           onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-          title={maximized ? "Restore" : "Maximize"}
+          title={maximized ? t("titlebar.restore") : t("titlebar.maximize")}
         >
           {maximized ? (
             <svg width="12" height="12" viewBox="0 0 12 12">
@@ -121,7 +213,7 @@ export default function TitleBar() {
             e.currentTarget.style.background = "transparent";
             e.currentTarget.style.color = "#9ca3af";
           }}
-          title="Close"
+          title={t("titlebar.close")}
         >
           <svg width="12" height="12" viewBox="0 0 12 12">
             <path d="M2 2l8 8M10 2L2 10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />

@@ -1,76 +1,60 @@
 import { Card, Typography } from "antd";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
+import { useTranslation } from "react-i18next";
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { useDashboardStore } from "../stores/dashboard";
 
 const { Text } = Typography;
 
 const COLORS: Record<string, string> = {
-  "claude-sonnet-4-6": "#6c5ce7",
-  "deepseek-chat": "#00b894",
-  "gpt-4o": "#74b9ff",
-  claude: "#6c5ce7",
-  deepseek: "#00b894",
+  "claude-sonnet-4-6": "#6366f1",
+  "deepseek-chat": "#10b981",
+  "gpt-4o": "#06b6d4",
 };
 
 export default function ModelDistribution() {
+  const { t } = useTranslation();
   const { modelDistribution } = useDashboardStore();
 
   const data = modelDistribution.map((item) => ({
     name: item.model,
     value: item.count,
-    color: COLORS[item.model] || COLORS[item.model.split("-")[0]] || "#636e72",
+    color: COLORS[item.model] || COLORS[item.model.split("-")[0]] || "#9ca3af",
   }));
 
   return (
     <Card
-      title={<span style={{ color: "#ccc", fontSize: 15 }}>Model Distribution</span>}
+      title={<span style={{ color: "#374151", fontSize: 14, fontWeight: 600 }}>{t("dashboard.modelDistribution")}</span>}
       bordered={false}
       style={{
-        background: "linear-gradient(135deg, #141428 0%, #1a1a35 100%)",
-        border: "1px solid #2a2a45",
+        background: "#ffffff",
+        border: "1px solid #e5e7eb",
         borderRadius: 10,
         height: "100%",
       }}
       bodyStyle={{ paddingBottom: 8 }}
     >
       {data.length === 0 ? (
-        <Text type="secondary">No data yet</Text>
+        <Text type="secondary">{t("dashboard.noDataYet")}</Text>
       ) : (
         <ResponsiveContainer width="100%" height={260}>
           <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              innerRadius={55}
-              outerRadius={90}
-              paddingAngle={4}
-              dataKey="value"
-              stroke="none"
-            >
+            <Pie data={data} cx="50%" cy="50%" innerRadius={55} outerRadius={90} paddingAngle={4} dataKey="value" stroke="none">
               {data.map((entry, i) => (
                 <Cell key={i} fill={entry.color} />
               ))}
             </Pie>
             <Tooltip
               contentStyle={{
-                background: "#1a1a35",
-                border: "1px solid #2a2a45",
+                background: "#fff",
+                border: "1px solid #e5e7eb",
                 borderRadius: 8,
-                color: "#ccc",
+                color: "#374151",
               }}
-              formatter={(value: number, name: string) => [`${value} requests`, name]}
+              formatter={(value: number, name: string) => [`${value} ${t("dashboard.requests")}`, name]}
             />
             <Legend
-              wrapperStyle={{ color: "#888", fontSize: 12 }}
-              formatter={(value: string, entry: any) => {
+              wrapperStyle={{ color: "#6b7280", fontSize: 12 }}
+              formatter={(value: string) => {
                 const pct = modelDistribution.find((d) => d.model === value);
                 return `${value} (${pct?.percentage ?? 0}%)`;
               }}

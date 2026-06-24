@@ -1,56 +1,40 @@
 import { Card, Typography } from "antd";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Area,
-  AreaChart,
-} from "recharts";
+import { useTranslation } from "react-i18next";
+import { AreaChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useDashboardStore } from "../stores/dashboard";
 
 const { Text } = Typography;
 
 export default function CostTrend() {
+  const { t } = useTranslation();
   const { costTrend } = useDashboardStore();
-
   const maxCost = Math.max(...costTrend.map((p) => p.cost), 0.01);
 
   return (
     <Card
-      title={
-        <span style={{ color: "#ccc", fontSize: 15 }}>Cost Trend (7 days)</span>
-      }
+      title={<span style={{ color: "#374151", fontSize: 14, fontWeight: 600 }}>{t("dashboard.costTrend")}</span>}
       bordered={false}
       style={{
-        background: "linear-gradient(135deg, #141428 0%, #1a1a35 100%)",
-        border: "1px solid #2a2a45",
+        background: "#ffffff",
+        border: "1px solid #e5e7eb",
         borderRadius: 10,
       }}
     >
       {costTrend.length === 0 ? (
-        <Text type="secondary">No data yet</Text>
+        <Text type="secondary">{t("dashboard.noDataYet")}</Text>
       ) : (
         <ResponsiveContainer width="100%" height={280}>
           <AreaChart data={costTrend}>
             <defs>
               <linearGradient id="costGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#6c5ce7" stopOpacity={0.4} />
-                <stop offset="95%" stopColor="#6c5ce7" stopOpacity={0} />
+                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.15} />
+                <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1a1a35" />
-            <XAxis
-              dataKey="date"
-              stroke="#666"
-              fontSize={12}
-              tickLine={false}
-            />
+            <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+            <XAxis dataKey="date" stroke="#9ca3af" fontSize={12} tickLine={false} />
             <YAxis
-              stroke="#666"
+              stroke="#9ca3af"
               fontSize={12}
               tickLine={false}
               domain={[0, Math.ceil(maxCost * 1.2 * 100) / 100]}
@@ -58,34 +42,19 @@ export default function CostTrend() {
             />
             <Tooltip
               contentStyle={{
-                background: "#1a1a35",
-                border: "1px solid #2a2a45",
+                background: "#fff",
+                border: "1px solid #e5e7eb",
                 borderRadius: 8,
-                color: "#ccc",
+                color: "#374151",
               }}
               formatter={(value: number, name: string) => {
-                if (name === "cost") return [`$${value.toFixed(4)}`, "Cost"];
-                return [value, "Requests"];
+                if (name === "cost") return [`$${value.toFixed(4)}`, t("dashboard.costAxis") as string];
+                return [value, t("dashboard.requests") as string];
               }}
-              labelFormatter={(label: string) => `Date: ${label}`}
+              labelFormatter={(label: string) => `${t("dashboard.date")}: ${label}`}
             />
-            <Area
-              type="monotone"
-              dataKey="cost"
-              stroke="#6c5ce7"
-              strokeWidth={2}
-              fill="url(#costGradient)"
-              name="cost"
-            />
-            <Line
-              type="monotone"
-              dataKey="requests"
-              stroke="#00b894"
-              strokeWidth={1.5}
-              strokeDasharray="4 4"
-              dot={{ r: 3, fill: "#00b894" }}
-              name="requests"
-            />
+            <Area type="monotone" dataKey="cost" stroke="#6366f1" strokeWidth={2} fill="url(#costGradient)" name="cost" />
+            <Line type="monotone" dataKey="requests" stroke="#10b981" strokeWidth={1.5} strokeDasharray="4 4" dot={{ r: 3, fill: "#10b981" }} name="requests" />
           </AreaChart>
         </ResponsiveContainer>
       )}
