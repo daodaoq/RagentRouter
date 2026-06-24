@@ -29,7 +29,7 @@ export default function App() {
         height: "100vh",
         width: "100vw",
         overflow: "hidden",
-        background: "var(--bg-primary)",
+        background: "#ffffff",
       }}
     >
       {/* Custom Title Bar */}
@@ -44,8 +44,7 @@ export default function App() {
           style={{
             flex: 1,
             overflow: "auto",
-            background:
-              "radial-gradient(ellipse at 50% 0%, rgba(108, 92, 231, 0.04) 0%, transparent 60%)",
+            background: "#f8f9fa",
           }}
         >
           {page === "dashboard" && <Dashboard />}

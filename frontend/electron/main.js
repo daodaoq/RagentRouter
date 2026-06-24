@@ -130,8 +130,8 @@ function startBackend() {
       setBackendStatus(false);
     });
 
-    // Poll for readiness
-    checkBackendHealth();
+    // Poll for readiness — give backend time to start first
+    setTimeout(checkBackendHealth, 2000);
   } catch (err) {
     console.error(`[Backend] Error: ${err.message}`);
     backendProcess = null;
@@ -150,25 +150,48 @@ function stopBackend() {
     }
     backendProcess = null;
   }
+  setBackendStatus(false);
 }
 
+let healthCheckTimer = null;
+
 function checkBackendHealth() {
+  // Clear any pending timer to avoid stacking
+  if (healthCheckTimer) {
+    clearTimeout(healthCheckTimer);
+    healthCheckTimer = null;
+  }
+
   const req = http.get(`http://localhost:${backendPort}/health`, (res) => {
-    if (res.statusCode === 200) {
-      setBackendStatus(true);
-    } else {
-      setBackendStatus(false);
-      setTimeout(checkBackendHealth, 2000);
-    }
+    let body = "";
+    res.on("data", (chunk) => (body += chunk));
+    res.on("end", () => {
+      if (res.statusCode === 200) {
+        setBackendStatus(true);
+        // Keep polling every 10s to detect backend going down
+        if (!isQuitting) {
+          healthCheckTimer = setTimeout(checkBackendHealth, 10000);
+        }
+      } else {
+        setBackendStatus(false);
+        if (!isQuitting) {
+          healthCheckTimer = setTimeout(checkBackendHealth, 2000);
+        }
+      }
+    });
   });
   req.on("error", () => {
     setBackendStatus(false);
-    if (!isQuitting) setTimeout(checkBackendHealth, 2000);
+    if (!isQuitting) {
+      healthCheckTimer = setTimeout(checkBackendHealth, 3000);
+    }
   });
-  req.setTimeout(3000, () => {
+  req.setTimeout(5000, () => {
     req.destroy();
     setBackendStatus(false);
-    if (!isQuitting) setTimeout(checkBackendHealth, 2000);
+    if (!isQuitting) {
+      healthCheckTimer = setTimeout(checkBackendHealth, 3000);
+    }
   });
 }
 
@@ -195,7 +218,7 @@ function createWindow() {
     minHeight: 640,
     frame: false,
     titleBarStyle: "hidden",
-    backgroundColor: "#0a0a1a",
+    backgroundColor: "#ffffff",
     show: false,
     icon: fs.existsSync(ICON_PATH) ? ICON_PATH : undefined,
     webPreferences: {
@@ -211,7 +234,7 @@ function createWindow() {
   // Load content
   if (isDev) {
     mainWindow.loadURL("http://localhost:5173");
-    mainWindow.webContents.openDevTools({ mode: "detach" });
+    // DevTools only open with Ctrl+Shift+I (no auto-open)
   } else {
     mainWindow.loadFile(path.join(__dirname, "..", "dist", "index.html"));
   }

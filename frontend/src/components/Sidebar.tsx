@@ -31,14 +31,14 @@ export default function Sidebar({ active, onChange }: Props) {
     <div
       style={{
         width: 64,
-        background: "linear-gradient(180deg, #0e0e24 0%, #0a0a1e 100%)",
-        borderRight: "1px solid #1a1a40",
+        background: "#fafbfc",
+        borderRight: "1px solid #e5e7eb",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         paddingTop: 12,
         flexShrink: 0,
-        gap: 4,
+        gap: 2,
       }}
     >
       {navItems.map((item) => {
@@ -52,32 +52,31 @@ export default function Sidebar({ active, onChange }: Props) {
                 height: 42,
                 borderRadius: 10,
                 border: "none",
-                background: isActive ? "rgba(108, 92, 231, 0.2)" : "transparent",
-                color: isActive ? "#a29bfe" : "#555",
+                background: isActive ? "#eef2ff" : "transparent",
+                color: isActive ? "#6366f1" : "#9ca3af",
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: 20,
-                transition: "all 0.2s",
+                fontSize: 19,
+                transition: "all 0.15s",
                 position: "relative",
                 outline: "none",
               }}
               onMouseEnter={(e) => {
                 if (!isActive) {
-                  e.currentTarget.style.color = "#888";
-                  e.currentTarget.style.background = "rgba(255,255,255,0.03)";
+                  e.currentTarget.style.color = "#6b7280";
+                  e.currentTarget.style.background = "#f3f4f6";
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isActive) {
-                  e.currentTarget.style.color = "#555";
+                  e.currentTarget.style.color = "#9ca3af";
                   e.currentTarget.style.background = "transparent";
                 }
               }}
             >
               {item.icon}
-              {/* Active indicator bar */}
               {isActive && (
                 <div
                   style={{
@@ -87,7 +86,7 @@ export default function Sidebar({ active, onChange }: Props) {
                     height: "40%",
                     width: 3,
                     borderRadius: "0 2px 2px 0",
-                    background: "linear-gradient(180deg, #6c5ce7, #a29bfe)",
+                    background: "#6366f1",
                   }}
                 />
               )}
@@ -96,15 +95,13 @@ export default function Sidebar({ active, onChange }: Props) {
         );
       })}
 
-      {/* Spacer */}
       <div style={{ flex: 1 }} />
 
-      {/* Bottom: version tag */}
       <div
         style={{
           paddingBottom: 14,
           fontSize: 9,
-          color: "#444",
+          color: "#d1d5db",
           fontWeight: 600,
           letterSpacing: 1,
         }}

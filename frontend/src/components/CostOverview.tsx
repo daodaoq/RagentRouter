@@ -54,14 +54,15 @@ export default function CostOverview({ overview }: Props) {
           <Card
             bordered={false}
             style={{
-              background: "linear-gradient(135deg, #141428 0%, #1a1a35 100%)",
-              border: "1px solid #2a2a45",
+              background: "#ffffff",
+              border: "1px solid #e5e7eb",
               borderRadius: 10,
+              boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
             }}
           >
             <Statistic
               title={
-                <span style={{ color: "#888", fontSize: 13 }}>{card.title}</span>
+                <span style={{ color: "#6b7280", fontSize: 12, fontWeight: 500 }}>{card.title}</span>
               }
               value={card.value}
               precision={card.precision}
@@ -96,14 +97,15 @@ export default function CostOverview({ overview }: Props) {
         <Card
           bordered={false}
           style={{
-            background: "linear-gradient(135deg, #141428 0%, #1a1a35 100%)",
-            border: "1px solid #2a2a45",
+            background: "#ffffff",
+            border: "1px solid #e5e7eb",
             borderRadius: 10,
+            boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
           }}
         >
           <Statistic
             title={
-              <span style={{ color: "#888", fontSize: 13 }}>Total Requests</span>
+              <span style={{ color: "#6b7280", fontSize: 12, fontWeight: 500 }}>Total Requests</span>
             }
             value={overview.total_requests}
             valueStyle={{
