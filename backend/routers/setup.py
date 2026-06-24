@@ -11,8 +11,10 @@ router = APIRouter(prefix="/api/setup", tags=["Setup"])
 
 CCSWITCH_DB = os.path.expanduser(r"~\.cc-switch\cc-switch.db")
 CCSWITCH_SETTINGS = os.path.expanduser(r"~\.cc-switch\settings.json")
+CLAUDE_SETTINGS = os.path.expanduser(r"~\.claude\settings.json")
 
 PROXY_PROVIDER_NAME = "RAgent Proxy"
+PROXY_URL = "http://localhost:15722"
 
 
 def _get_rw_db():
@@ -150,6 +152,19 @@ def apply_setup():
         with open(CCSWITCH_SETTINGS, "w") as f:
             json.dump(settings, f, indent=2, ensure_ascii=False)
 
+        # Update Claude Code settings — this is what Claude Code actually reads
+        previous_claude_url = None
+        if os.path.exists(CLAUDE_SETTINGS):
+            with open(CLAUDE_SETTINGS, "r") as f:
+                claude_cfg = json.load(f)
+            env = claude_cfg.get("env", {})
+            previous_claude_url = env.get("ANTHROPIC_BASE_URL", "")
+            env["ANTHROPIC_BASE_URL"] = PROXY_URL
+            claude_cfg["env"] = env
+            claude_cfg["_ragent_previous_base_url"] = previous_claude_url
+            with open(CLAUDE_SETTINGS, "w") as f:
+                json.dump(claude_cfg, f, indent=2, ensure_ascii=False)
+
         return {
             "success": True,
             "proxy_id": new_id,
@@ -173,6 +188,18 @@ def revert_setup():
         ).fetchone()
         if not proxy_row:
             raise HTTPException(400, "RAgent Proxy not found — nothing to revert")
+
+        # Restore Claude Code settings
+        if os.path.exists(CLAUDE_SETTINGS):
+            with open(CLAUDE_SETTINGS, "r") as f:
+                claude_cfg = json.load(f)
+            previous_url = claude_cfg.pop("_ragent_previous_base_url", None)
+            if previous_url:
+                env = claude_cfg.get("env", {})
+                env["ANTHROPIC_BASE_URL"] = previous_url
+                claude_cfg["env"] = env
+            with open(CLAUDE_SETTINGS, "w") as f:
+                json.dump(claude_cfg, f, indent=2, ensure_ascii=False)
 
         # Read previous provider from settings
         previous_id = None
