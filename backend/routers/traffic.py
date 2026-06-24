@@ -2,11 +2,12 @@
 
 All data comes from actual Claude Code usage tracked by CC Switch.
 No mock/demo data. Costs are calculated from model pricing × token counts.
+Timestamps are Unix seconds (CC Switch format).
 """
 
 import os
 import sqlite3
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Query
 
@@ -24,36 +25,22 @@ def _get_db():
 
 
 def _to_timestamp(raw: int) -> datetime:
-    """CC Switch uses JavaScript milliseconds; also handle second-based timestamps."""
-    if raw > 10_000_000_000_000:
-        return datetime.fromtimestamp(raw / 1000, tz=timezone.utc)
-    if raw > 1_000_000_000:
-        return datetime.fromtimestamp(raw, tz=timezone.utc)
-    # Fallback: small values treated as seconds
+    """CC Switch proxy_request_logs uses Unix seconds."""
     return datetime.fromtimestamp(raw, tz=timezone.utc)
 
 
 def _calc_cost(model: str, input_tokens: int, output_tokens: int, pricing: dict) -> float:
-    """Calculate real cost from token counts and model pricing."""
     rates = pricing.get(model, {})
     in_rate = rates.get("input", 0.0)
     out_rate = rates.get("output", 0.0)
     return round((input_tokens / 1_000_000) * in_rate + (output_tokens / 1_000_000) * out_rate, 6)
 
 
-# ── Endpoints ──────────────────────────────────────────────────────
-
-
-@router.get("/overview")
-def traffic_overview():
-    """Overall traffic stats: total requests, tokens, cost, this month."""
-    conn = _get_db()
-    if not conn:
-        return {"available": False}
-
-    # Load pricing
+def _load_pricing(conn) -> dict:
     pricing = {}
-    for r in conn.execute("SELECT model_id, input_cost_per_million, output_cost_per_million FROM model_pricing").fetchall():
+    for r in conn.execute(
+        "SELECT model_id, input_cost_per_million, output_cost_per_million FROM model_pricing"
+    ).fetchall():
         try:
             pricing[r["model_id"]] = {
                 "input": float(r["input_cost_per_million"]),
@@ -61,42 +48,53 @@ def traffic_overview():
             }
         except (ValueError, TypeError):
             pass
+    return pricing
 
-    # Total stats
+
+# ── Endpoints ──────────────────────────────────────────────────────
+
+
+@router.get("/overview")
+def traffic_overview():
+    conn = _get_db()
+    if not conn:
+        return {"available": False}
+
+    pricing = _load_pricing(conn)
+    now = datetime.now(timezone.utc)
+
+    # Total
     total = conn.execute(
-        "SELECT COUNT(*) as cnt, "
-        "SUM(input_tokens) as it, SUM(output_tokens) as ot "
+        "SELECT COUNT(*) as cnt, SUM(input_tokens) as it, SUM(output_tokens) as ot "
         "FROM proxy_request_logs"
     ).fetchone()
 
-    # This month
-    now = datetime.now(timezone.utc)
-    month_start_ms = int(now.replace(day=1, hour=0, minute=0, second=0, microsecond=0).timestamp() * 1000)
+    # This month (Unix seconds)
+    month_start = int(now.replace(day=1, hour=0, minute=0, second=0, microsecond=0).timestamp())
     month = conn.execute(
         "SELECT COUNT(*) as cnt, SUM(input_tokens) as it, SUM(output_tokens) as ot "
         "FROM proxy_request_logs WHERE created_at >= ?",
-        (month_start_ms,),
+        (month_start,),
     ).fetchone()
 
     # Today
-    today_start_ms = int(now.replace(hour=0, minute=0, second=0, microsecond=0).timestamp() * 1000)
+    today_start = int(now.replace(hour=0, minute=0, second=0, microsecond=0).timestamp())
     today = conn.execute(
         "SELECT COUNT(*) as cnt, SUM(input_tokens) as it, SUM(output_tokens) as ot "
         "FROM proxy_request_logs WHERE created_at >= ?",
-        (today_start_ms,),
+        (today_start,),
     ).fetchone()
 
-    # Calculate costs by iterating (SQL can't call Python)
-    def get_model_rows(extra_where=""):
-        q = f"SELECT model, SUM(input_tokens) as it, SUM(output_tokens) as ot FROM proxy_request_logs {extra_where} GROUP BY model"
+    def rows_for(where=""):
+        q = f"SELECT model, SUM(input_tokens) as it, SUM(output_tokens) as ot FROM proxy_request_logs {where} GROUP BY model"
         return conn.execute(q).fetchall()
 
     def sum_cost(rows):
         return sum(_calc_cost(r["model"], r["it"] or 0, r["ot"] or 0, pricing) for r in rows)
 
-    total_rows = get_model_rows()
-    today_rows = get_model_rows("WHERE created_at >= " + str(today_start_ms))
-    month_rows = get_model_rows("WHERE created_at >= " + str(month_start_ms))
+    total_rows = rows_for()
+    today_rows = rows_for(f"WHERE created_at >= {today_start}")
+    month_rows = rows_for(f"WHERE created_at >= {month_start}")
 
     conn.close()
 
@@ -125,21 +123,11 @@ def traffic_overview():
 
 @router.get("/by-model")
 def traffic_by_model():
-    """Breakdown by model."""
     conn = _get_db()
     if not conn:
         return {"available": False, "items": []}
 
-    pricing = {}
-    for r in conn.execute("SELECT model_id, input_cost_per_million, output_cost_per_million FROM model_pricing").fetchall():
-        try:
-            pricing[r["model_id"]] = {
-                "input": float(r["input_cost_per_million"]),
-                "output": float(r["output_cost_per_million"]),
-            }
-        except (ValueError, TypeError):
-            pass
-
+    pricing = _load_pricing(conn)
     rows = conn.execute(
         "SELECT model, COUNT(*) as cnt, SUM(input_tokens) as it, SUM(output_tokens) as ot "
         "FROM proxy_request_logs GROUP BY model ORDER BY cnt DESC"
@@ -162,21 +150,11 @@ def traffic_by_model():
 
 @router.get("/recent")
 def traffic_recent(limit: int = Query(default=20, le=100)):
-    """Latest requests with cost calculated."""
     conn = _get_db()
     if not conn:
         return {"available": False, "items": []}
 
-    pricing = {}
-    for r in conn.execute("SELECT model_id, input_cost_per_million, output_cost_per_million FROM model_pricing").fetchall():
-        try:
-            pricing[r["model_id"]] = {
-                "input": float(r["input_cost_per_million"]),
-                "output": float(r["output_cost_per_million"]),
-            }
-        except (ValueError, TypeError):
-            pass
-
+    pricing = _load_pricing(conn)
     rows = conn.execute(
         "SELECT created_at, model, input_tokens, output_tokens, status_code, latency_ms "
         "FROM proxy_request_logs ORDER BY created_at DESC LIMIT ?",
@@ -188,10 +166,11 @@ def traffic_recent(limit: int = Query(default=20, le=100)):
         cost = _calc_cost(r["model"], r["input_tokens"] or 0, r["output_tokens"] or 0, pricing)
         try:
             ts = _to_timestamp(r["created_at"])
+            ts_str = ts.strftime("%Y-%m-%d %H:%M:%S")
         except Exception:
-            ts = None
+            ts_str = "unknown"
         items.append({
-            "time": ts.isoformat() if ts else "unknown",
+            "time": ts_str,
             "model": r["model"],
             "input_tokens": r["input_tokens"],
             "output_tokens": r["output_tokens"],
@@ -206,27 +185,16 @@ def traffic_recent(limit: int = Query(default=20, le=100)):
 
 @router.get("/daily-trend")
 def daily_trend(days: int = Query(default=14, le=90)):
-    """Daily token/cost trend."""
     conn = _get_db()
     if not conn:
         return {"available": False, "points": []}
 
-    pricing = {}
-    for r in conn.execute("SELECT model_id, input_cost_per_million, output_cost_per_million FROM model_pricing").fetchall():
-        try:
-            pricing[r["model_id"]] = {
-                "input": float(r["input_cost_per_million"]),
-                "output": float(r["output_cost_per_million"]),
-            }
-        except (ValueError, TypeError):
-            pass
-
+    pricing = _load_pricing(conn)
     rows = conn.execute(
         "SELECT created_at, model, input_tokens, output_tokens FROM proxy_request_logs "
         "ORDER BY created_at ASC"
     ).fetchall()
 
-    # Aggregate by day
     daily: dict[str, dict] = {}
     for r in rows:
         try:
@@ -241,7 +209,6 @@ def daily_trend(days: int = Query(default=14, le=90)):
         daily[day]["output_tokens"] += r["output_tokens"] or 0
         daily[day]["cost_usd"] += _calc_cost(r["model"], r["input_tokens"] or 0, r["output_tokens"] or 0, pricing)
 
-    # Sort and limit
     sorted_days = sorted(daily.values(), key=lambda d: d["date"])[-days:]
     for d in sorted_days:
         d["cost_usd"] = round(d["cost_usd"], 6)
@@ -252,7 +219,6 @@ def daily_trend(days: int = Query(default=14, le=90)):
 
 @router.get("/status")
 def traffic_status():
-    """Check if CC Switch traffic data is available."""
     exists = os.path.exists(CCSWITCH_DB)
     count = 0
     if exists:
