@@ -7,7 +7,20 @@
     "dashboard": "仪表盘",
     "rules": "路由规则",
     "test": "测试控制台",
+    "providers": "API 供应商",
     "settings": "设置"
+  },
+  "providers": {
+    "title": "API 供应商",
+    "source": "数据来源: CC Switch 本地数据库",
+    "current": "当前使用",
+    "multiplier": "倍率",
+    "daily": "日限额",
+    "monthly": "月限额",
+    "notFound": "未检测到 CC Switch 数据库",
+    "official": "官方",
+    "cnOfficial": "国内官方",
+    "custom": "自定义"
   },
   "dashboard": {
     "title": "仪表盘",

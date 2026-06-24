@@ -5,9 +5,10 @@ import {
   NodeIndexOutlined,
   ThunderboltOutlined,
   SettingOutlined,
+  ApiOutlined,
 } from "@ant-design/icons";
 
-type Page = "dashboard" | "rules" | "test" | "settings";
+type Page = "dashboard" | "rules" | "test" | "providers" | "settings";
 
 interface NavItem {
   key: Page;
@@ -22,6 +23,7 @@ export default function Sidebar({ active, onChange }: { active: Page; onChange: 
     { key: "dashboard", icon: <DashboardOutlined />, labelKey: "nav.dashboard" },
     { key: "rules", icon: <NodeIndexOutlined />, labelKey: "nav.rules" },
     { key: "test", icon: <ThunderboltOutlined />, labelKey: "nav.test" },
+    { key: "providers", icon: <ApiOutlined />, labelKey: "nav.providers" },
     { key: "settings", icon: <SettingOutlined />, labelKey: "nav.settings" },
   ];
 

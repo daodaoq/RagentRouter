@@ -7,7 +7,20 @@
     "dashboard": "Dashboard",
     "rules": "Route Rules",
     "test": "Test Console",
+    "providers": "Providers",
     "settings": "Settings"
+  },
+  "providers": {
+    "title": "API Providers",
+    "source": "Data source: CC Switch local database",
+    "current": "Currently active",
+    "multiplier": "Multiplier",
+    "daily": "Daily",
+    "monthly": "Monthly",
+    "notFound": "CC Switch database not found",
+    "official": "Official",
+    "cnOfficial": "CN Official",
+    "custom": "Custom"
   },
   "dashboard": {
     "title": "Dashboard",

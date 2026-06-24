@@ -5,10 +5,11 @@ import StatusBar from "./components/StatusBar";
 import Dashboard from "./pages/Dashboard";
 import RuleManager from "./components/RuleManager";
 import TestConsole from "./components/TestConsole";
+import Providers from "./components/Providers";
 import Settings from "./components/Settings";
 import { useDashboardStore } from "./stores/dashboard";
 
-type Page = "dashboard" | "rules" | "test" | "settings";
+type Page = "dashboard" | "rules" | "test" | "providers" | "settings";
 
 export default function App() {
   const [page, setPage] = useState<Page>("dashboard");
@@ -52,6 +53,7 @@ export default function App() {
           {page === "dashboard" && <Dashboard />}
           {page === "rules" && <RuleManager />}
           {page === "test" && <TestConsole />}
+          {page === "providers" && <Providers />}
           {page === "settings" && <Settings />}
         </div>
       </div>
