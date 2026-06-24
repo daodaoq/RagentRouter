@@ -65,14 +65,12 @@ export default function CostOverview({ overview }: Props) {
               }
               value={card.value}
               precision={card.precision}
-              prefix={card.prefix}
               suffix={card.suffix}
               valueStyle={{
                 color: card.color,
                 fontSize: 28,
                 fontWeight: 700,
               }}
-              // @ts-ignore
               prefix={
                 <span style={{ color: card.color, fontSize: 22 }}>
                   {card.prefix}
