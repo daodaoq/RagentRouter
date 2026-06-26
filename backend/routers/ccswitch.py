@@ -1,24 +1,30 @@
 """CC Switch integration — display and switch providers.
 
-Switching works by:
-1. Updating CC Switch's DB + settings.json
-2. Restarting CC Switch so it picks up the new config
+Switching (matching CC Switch's own behavior):
+1. Read provider's full settings_config from CC Switch DB
+2. Sanitize (strip internal-only fields: api_format, openrouter_compat_mode)
+3. Write directly to ~/.claude/settings.json
+4. Update CC Switch DB is_current + local settings.json
 """
 
 import json
+import logging
 import os
 import sqlite3
-import subprocess
-import time
 
 from fastapi import APIRouter, HTTPException
 
 router = APIRouter(prefix="/api/ccswitch", tags=["CC Switch"])
 
-# CC Switch paths
+log = logging.getLogger("ragent")
+
+# Paths
 CCSWITCH_DB = os.path.expanduser(r"~\.cc-switch\cc-switch.db")
 CCSWITCH_SETTINGS = os.path.expanduser(r"~\.cc-switch\settings.json")
-CCSWITCH_EXE = r"D:\ccswitch\cc-switch.exe"
+CLAUDE_SETTINGS = os.path.expanduser(r"~\.claude\settings.json")
+
+# Internal fields to strip before writing to Claude Code config
+SANITIZE_KEYS = {"api_format", "apiFormat", "openrouter_compat_mode", "openrouterCompatMode"}
 
 
 def _get_ccswitch_db(readonly=True):
@@ -30,31 +36,11 @@ def _get_ccswitch_db(readonly=True):
     return conn
 
 
-def _restart_ccswitch():
-    """Kill and restart CC Switch so it picks up config changes."""
-    # Kill existing process
-    try:
-        subprocess.run(
-            ["taskkill", "/F", "/IM", "cc-switch.exe"],
-            capture_output=True,
-            timeout=10,
-        )
-    except Exception:
-        pass
-
-    # Wait for process to fully exit
-    time.sleep(2)
-
-    # Restart
-    if os.path.exists(CCSWITCH_EXE):
-        subprocess.Popen(
-            [CCSWITCH_EXE],
-            cwd=os.path.dirname(CCSWITCH_EXE),
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-        return True
-    return False
+def _sanitize_settings(settings: dict) -> dict:
+    """Remove CC Switch internal fields before writing to Claude Code config."""
+    for key in SANITIZE_KEYS:
+        settings.pop(key, None)
+    return settings
 
 
 # ── Read endpoints ──────────────────────────────────────────────────
@@ -131,41 +117,68 @@ def ccswitch_status():
     return {
         "available": exists,
         "path": CCSWITCH_DB,
-        "exe_path": CCSWITCH_EXE,
-        "exe_exists": os.path.exists(CCSWITCH_EXE),
         "db_size_mb": round(os.path.getsize(CCSWITCH_DB) / (1024 * 1024), 2) if exists else 0,
     }
 
 
-# ── Activate (write + restart) ──────────────────────────────────────
+# ── Activate ──────────────────────────────────────────────────────
 
 
 @router.post("/activate/{provider_id}")
 def activate_provider(provider_id: str):
     """Switch Claude Code's active API provider.
 
-    Writes to CC Switch config, then restarts CC Switch to apply.
+    Matches CC Switch's own behavior exactly:
+    1. Read provider's complete settings_config
+    2. Sanitize (strip internal fields)
+    3. Write directly to ~/.claude/settings.json
+    4. Update CC Switch DB + local settings
     """
     if not os.path.exists(CCSWITCH_DB):
         raise HTTPException(404, "CC Switch database not found")
-    if not os.path.exists(CCSWITCH_SETTINGS):
-        raise HTTPException(404, "CC Switch settings not found")
-    if not os.path.exists(CCSWITCH_EXE):
-        raise HTTPException(500, f"CC Switch executable not found at {CCSWITCH_EXE}")
 
-    # 1. Verify provider exists
+    # 1. Read provider with full settings_config
     ro_conn = _get_ccswitch_db(readonly=True)
     try:
         provider = ro_conn.execute(
-            "SELECT id, name, app_type FROM providers WHERE id = ? AND name != 'default'",
+            "SELECT id, name, app_type, settings_config FROM providers "
+            "WHERE id = ? AND name != 'default'",
             (provider_id,),
         ).fetchone()
         if not provider:
             raise HTTPException(404, f"Provider '{provider_id}' not found")
+        if not provider["settings_config"]:
+            raise HTTPException(400, f"Provider '{provider['name']}' has no configuration")
+
+        provider_config = json.loads(provider["settings_config"])
     finally:
         ro_conn.close()
 
-    # 2. Update providers table
+    # 2. Merge with current settings to preserve non-provider fields
+    #    (permissions, theme, enabledPlugins, etc.)
+    if os.path.exists(CLAUDE_SETTINGS):
+        with open(CLAUDE_SETTINGS, "r", encoding="utf-8") as f:
+            current_settings = json.load(f)
+    else:
+        current_settings = {}
+
+    # Provider config takes priority, current settings fill in gaps
+    merged = {**current_settings, **provider_config}
+    # Deep-merge env separately to avoid losing provider's env keys
+    if "env" in provider_config and "env" in current_settings:
+        merged["env"] = {**current_settings["env"], **provider_config["env"]}
+
+    sanitized = _sanitize_settings(merged)
+
+    # Ensure directory exists
+    claude_dir = os.path.dirname(CLAUDE_SETTINGS)
+    os.makedirs(claude_dir, exist_ok=True)
+
+    with open(CLAUDE_SETTINGS, "w", encoding="utf-8") as f:
+        json.dump(sanitized, f, indent=2, ensure_ascii=False)
+    log.info("SWITCH | wrote %s config to %s", provider["name"], CLAUDE_SETTINGS)
+
+    # 3. Update CC Switch DB — is_current
     rw_conn = _get_ccswitch_db(readonly=False)
     try:
         rw_conn.execute(
@@ -180,20 +193,21 @@ def activate_provider(provider_id: str):
     finally:
         rw_conn.close()
 
-    # 3. Update settings.json
-    with open(CCSWITCH_SETTINGS, "r", encoding="utf-8") as f:
-        settings = json.load(f)
-    settings["currentProviderClaude"] = provider_id
+    # 4. Update CC Switch's local settings.json
+    if os.path.exists(CCSWITCH_SETTINGS):
+        with open(CCSWITCH_SETTINGS, "r", encoding="utf-8") as f:
+            ccs_settings = json.load(f)
+    else:
+        ccs_settings = {}
+    ccs_settings["currentProviderClaude"] = provider_id
     with open(CCSWITCH_SETTINGS, "w", encoding="utf-8") as f:
-        json.dump(settings, f, indent=2, ensure_ascii=False)
-
-    # 4. Restart CC Switch to apply
-    restarted = _restart_ccswitch()
+        json.dump(ccs_settings, f, indent=2, ensure_ascii=False)
 
     return {
         "success": True,
         "provider_id": provider_id,
         "provider_name": provider["name"],
-        "restarted": restarted,
-        "message": f"Switched to '{provider['name']}'. CC Switch has been restarted to apply changes.",
+        "message": (
+            f"已切换到 '{provider['name']}' — Claude Code 下个请求自动使用新供应商，无需重启。"
+        ),
     }

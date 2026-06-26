@@ -37,7 +37,7 @@ export default function Dashboard() {
 
   return (
     <div style={{ padding: 20 }}>
-      <div style={{ marginBottom: 16, fontSize: 16, fontWeight: 600, color: "#374151" }}>
+      <div style={{ marginBottom: 16, fontSize: 16, fontWeight: 600, color: "var(--text-primary)" }}>
         📊 {t("dashboard.title")}
         <PageHelp page="dashboard" />
       </div>

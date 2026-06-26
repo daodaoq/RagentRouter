@@ -21,9 +21,48 @@ function Root() {
     return () => { i18n.off("languageChanged", handler); };
   }, []);
 
-  // Apply theme class to document
+  // Apply theme — set data-theme attribute AND CSS variables directly on <html>
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", mode);
+    const html = document.documentElement;
+    html.setAttribute("data-theme", mode);
+    const vars = mode === "dark"
+      ? {
+          "--bg-primary": "#0a0a1a",
+          "--bg-secondary": "#0e0e24",
+          "--bg-card": "#141428",
+          "--bg-elevated": "#1a1a35",
+          "--bg-active": "#252845",
+          "--border-color": "#1a1a40",
+          "--border-light": "#2a2a45",
+          "--text-primary": "#e0e0e0",
+          "--text-secondary": "#888",
+          "--text-muted": "#555",
+          "--accent": "#818cf8",
+          "--accent-light": "#a5b4fc",
+          "--green": "#34d399",
+          "--red": "#f87171",
+          "--orange": "#fbbf24",
+        }
+      : {
+          "--bg-primary": "#ffffff",
+          "--bg-secondary": "#f8f9fa",
+          "--bg-card": "#ffffff",
+          "--bg-elevated": "#f0f1f3",
+          "--bg-active": "#eef2ff",
+          "--border-color": "#e8e9eb",
+          "--border-light": "#e0e1e3",
+          "--text-primary": "#1a1a2e",
+          "--text-secondary": "#6b7280",
+          "--text-muted": "#9ca3af",
+          "--accent": "#6366f1",
+          "--accent-light": "#818cf8",
+          "--green": "#10b981",
+          "--red": "#ef4444",
+          "--orange": "#f59e0b",
+        };
+    for (const [k, v] of Object.entries(vars)) {
+      html.style.setProperty(k, v);
+    }
   }, [mode]);
 
   const isDark = mode === "dark";
@@ -35,10 +74,6 @@ function Root() {
         algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
         token: {
           colorPrimary: "#6366f1",
-          colorBgBase: isDark ? "#0a0a1a" : "#ffffff",
-          colorBgContainer: isDark ? "#141428" : "#ffffff",
-          colorBgElevated: isDark ? "#1a1a35" : "#f8f9fa",
-          colorBorder: isDark ? "#2a2a45" : "#e5e7eb",
           borderRadius: 8,
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
           fontSize: 13,

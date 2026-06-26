@@ -1,14 +1,14 @@
 import { Tooltip } from "antd";
 import { useTranslation } from "react-i18next";
 import {
-  NodeIndexOutlined,
-  ThunderboltOutlined,
   SettingOutlined,
   ApiOutlined,
   BarChartOutlined,
+  RobotOutlined,
+  MonitorOutlined,
 } from "@ant-design/icons";
 
-type Page = "providers" | "traffic" | "rules" | "test" | "settings";
+type Page = "providers" | "traffic" | "settings" | "intent" | "monitor";
 
 interface NavItem {
   key: Page;
@@ -22,8 +22,8 @@ export default function Sidebar({ active, onChange }: { active: Page; onChange: 
   const navItems: NavItem[] = [
     { key: "providers", icon: <ApiOutlined />, labelKey: "nav.providers" },
     { key: "traffic", icon: <BarChartOutlined />, labelKey: "nav.traffic" },
-    { key: "rules", icon: <NodeIndexOutlined />, labelKey: "nav.rules" },
-    { key: "test", icon: <ThunderboltOutlined />, labelKey: "nav.test" },
+    { key: "monitor", icon: <MonitorOutlined />, labelKey: "nav.monitor" },
+    { key: "intent", icon: <RobotOutlined />, labelKey: "nav.intent" },
     { key: "settings", icon: <SettingOutlined />, labelKey: "nav.settings" },
   ];
 
@@ -31,8 +31,8 @@ export default function Sidebar({ active, onChange }: { active: Page; onChange: 
     <div
       style={{
         width: 64,
-        background: "#fafbfc",
-        borderRight: "1px solid #e5e7eb",
+        background: "var(--bg-primary)",
+        borderRight: "1px solid var(--border-light)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -52,8 +52,8 @@ export default function Sidebar({ active, onChange }: { active: Page; onChange: 
                 height: 42,
                 borderRadius: 10,
                 border: "none",
-                background: isActive ? "#eef2ff" : "transparent",
-                color: isActive ? "#6366f1" : "#9ca3af",
+                background: isActive ? "var(--bg-active)" : "transparent",
+                color: isActive ? "var(--accent)" : "var(--text-muted)",
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
@@ -65,13 +65,13 @@ export default function Sidebar({ active, onChange }: { active: Page; onChange: 
               }}
               onMouseEnter={(e) => {
                 if (!isActive) {
-                  e.currentTarget.style.color = "#6b7280";
-                  e.currentTarget.style.background = "#f3f4f6";
+                  e.currentTarget.style.color = "var(--text-secondary)";
+                  e.currentTarget.style.background = "var(--bg-elevated)";
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isActive) {
-                  e.currentTarget.style.color = "#9ca3af";
+                  e.currentTarget.style.color = "var(--text-muted)";
                   e.currentTarget.style.background = "transparent";
                 }
               }}
@@ -86,7 +86,7 @@ export default function Sidebar({ active, onChange }: { active: Page; onChange: 
                     height: "40%",
                     width: 3,
                     borderRadius: "0 2px 2px 0",
-                    background: "#6366f1",
+                    background: "var(--accent)",
                   }}
                 />
               )}
@@ -95,7 +95,7 @@ export default function Sidebar({ active, onChange }: { active: Page; onChange: 
         );
       })}
       <div style={{ flex: 1 }} />
-      <div style={{ paddingBottom: 14, fontSize: 9, color: "#d1d5db", fontWeight: 600, letterSpacing: 1 }}>
+      <div style={{ paddingBottom: 14, fontSize: 9, color: "var(--text-muted)", fontWeight: 600, letterSpacing: 1 }}>
         {t("app.version")}
       </div>
     </div>

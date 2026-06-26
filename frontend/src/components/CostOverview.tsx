@@ -14,14 +14,14 @@ export default function CostOverview({ overview }: Props) {
       title: t("dashboard.todayCost"),
       value: overview.today_cost,
       prefix: "$",
-      color: "#6366f1",
+      color: "var(--accent)",
       precision: 2,
     },
     {
       title: t("dashboard.monthCost"),
       value: overview.month_cost,
       prefix: "$",
-      color: "#10b981",
+      color: "var(--green)",
       precision: 2,
     },
     {
@@ -35,7 +35,7 @@ export default function CostOverview({ overview }: Props) {
       title: t("dashboard.savingRate"),
       value: overview.saving_rate,
       suffix: "%",
-      color: "#f59e0b",
+      color: "var(--orange)",
       precision: 1,
     },
   ];
@@ -47,14 +47,14 @@ export default function CostOverview({ overview }: Props) {
           <Card
             bordered={false}
             style={{
-              background: "#ffffff",
-              border: "1px solid #e5e7eb",
+              background: "var(--bg-card)",
+              border: "1px solid var(--border-light)",
               borderRadius: 10,
               boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
             }}
           >
             <Statistic
-              title={<span style={{ color: "#6b7280", fontSize: 12, fontWeight: 500 }}>{card.title}</span>}
+              title={<span style={{ color: "var(--text-secondary)", fontSize: 12, fontWeight: 500 }}>{card.title}</span>}
               value={card.value}
               precision={card.precision}
               suffix={card.suffix}
@@ -68,16 +68,16 @@ export default function CostOverview({ overview }: Props) {
         <Card
           bordered={false}
           style={{
-            background: "#ffffff",
-            border: "1px solid #e5e7eb",
+            background: "var(--bg-card)",
+            border: "1px solid var(--border-light)",
             borderRadius: 10,
             boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
           }}
         >
           <Statistic
-            title={<span style={{ color: "#6b7280", fontSize: 12, fontWeight: 500 }}>{t("dashboard.totalRequests")}</span>}
+            title={<span style={{ color: "var(--text-secondary)", fontSize: 12, fontWeight: 500 }}>{t("dashboard.totalRequests")}</span>}
             value={overview.total_requests}
-            valueStyle={{ color: "#374151", fontSize: 28, fontWeight: 700 }}
+            valueStyle={{ color: "var(--text-primary)", fontSize: 28, fontWeight: 700 }}
           />
         </Card>
       </Col>

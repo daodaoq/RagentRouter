@@ -6,8 +6,8 @@ import { useDashboardStore } from "../stores/dashboard";
 const { Text } = Typography;
 
 const COLORS: Record<string, string> = {
-  "claude-sonnet-4-6": "#6366f1",
-  "deepseek-chat": "#10b981",
+  "claude-sonnet-4-6": "var(--accent)",
+  "deepseek-chat": "var(--green)",
   "gpt-4o": "#06b6d4",
 };
 
@@ -18,16 +18,16 @@ export default function ModelDistribution() {
   const data = modelDistribution.map((item) => ({
     name: item.model,
     value: item.count,
-    color: COLORS[item.model] || COLORS[item.model.split("-")[0]] || "#9ca3af",
+    color: COLORS[item.model] || COLORS[item.model.split("-")[0]] || "var(--text-muted)",
   }));
 
   return (
     <Card
-      title={<span style={{ color: "#374151", fontSize: 14, fontWeight: 600 }}>{t("dashboard.modelDistribution")}</span>}
+      title={<span style={{ color: "var(--text-primary)", fontSize: 14, fontWeight: 600 }}>{t("dashboard.modelDistribution")}</span>}
       bordered={false}
       style={{
-        background: "#ffffff",
-        border: "1px solid #e5e7eb",
+        background: "var(--bg-card)",
+        border: "1px solid var(--border-light)",
         borderRadius: 10,
         height: "100%",
       }}
@@ -45,15 +45,15 @@ export default function ModelDistribution() {
             </Pie>
             <Tooltip
               contentStyle={{
-                background: "#fff",
-                border: "1px solid #e5e7eb",
+                background: "var(--bg-card)",
+                border: "1px solid var(--border-light)",
                 borderRadius: 8,
-                color: "#374151",
+                color: "var(--text-primary)",
               }}
               formatter={(value: number, name: string) => [`${value} ${t("dashboard.requests")}`, name]}
             />
             <Legend
-              wrapperStyle={{ color: "#6b7280", fontSize: 12 }}
+              wrapperStyle={{ color: "var(--text-secondary)", fontSize: 12 }}
               formatter={(value: string) => {
                 const pct = modelDistribution.find((d) => d.model === value);
                 return `${value} (${pct?.percentage ?? 0}%)`;

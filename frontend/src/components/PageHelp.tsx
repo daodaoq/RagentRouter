@@ -3,7 +3,7 @@ import { QuestionCircleOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 
 interface Props {
-  page: "providers" | "traffic" | "dashboard" | "rules" | "test" | "settings";
+  page: "providers" | "traffic" | "dashboard" | "monitor" | "intent" | "settings";
 }
 
 export default function PageHelp({ page }: Props) {
@@ -15,7 +15,7 @@ export default function PageHelp({ page }: Props) {
   return (
     <Popover
       content={
-        <div style={{ maxWidth: 300, fontSize: 12, lineHeight: 1.6, color: "#374151" }}>
+        <div style={{ maxWidth: 300, fontSize: 12, lineHeight: 1.6, color: "var(--text-primary)" }}>
           {content}
         </div>
       }
@@ -32,7 +32,7 @@ export default function PageHelp({ page }: Props) {
           height: 18,
           borderRadius: "50%",
           border: "1px solid #d1d5db",
-          color: "#9ca3af",
+          color: "var(--text-muted)",
           fontSize: 11,
           cursor: "pointer",
           transition: "all 0.15s",
@@ -40,13 +40,13 @@ export default function PageHelp({ page }: Props) {
           verticalAlign: "middle",
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = "#6366f1";
-          e.currentTarget.style.color = "#6366f1";
-          e.currentTarget.style.background = "#eef2ff";
+          e.currentTarget.style.borderColor = "var(--accent)";
+          e.currentTarget.style.color = "var(--accent)";
+          e.currentTarget.style.background = "var(--bg-active)";
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = "#d1d5db";
-          e.currentTarget.style.color = "#9ca3af";
+          e.currentTarget.style.borderColor = "var(--text-muted)";
+          e.currentTarget.style.color = "var(--text-muted)";
           e.currentTarget.style.background = "transparent";
         }}
       >

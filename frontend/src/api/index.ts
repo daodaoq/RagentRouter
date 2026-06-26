@@ -56,59 +56,32 @@ export const dashboardApi = {
     request<{ points: CostTrendPoint[] }>(`/api/dashboard/cost-trend?days=${days}`),
 };
 
-// ── Rules ─────────────────────────────────────────────────────────
+// ── Proxy (instant provider switching) ─────────────────────────────
 
-export interface RouteRule {
-  id: string;
-  name: string;
-  description: string;
-  keywords: string[];
-  target_model: string;
-  priority: number;
-  enabled: boolean;
-  created_at: string;
+export interface ProxyCurrent {
+  provider_id: string;
+  provider_name: string;
+  endpoints: { app_type: string; url: string }[];
+  is_valid: boolean;
+  base_url: string | null;
+  warning: string | null;
 }
 
-export interface RuleCreateInput {
-  name: string;
-  description?: string;
-  keywords?: string[];
-  target_model?: string;
-  priority?: number;
-  enabled?: boolean;
+export interface ProxyHealth {
+  ccswitch_db_available: boolean;
+  state_file_ok: boolean;
+  active_provider_id: string;
+  active_provider_valid: boolean;
+  warnings: string[];
+  proxy_ready: boolean;
 }
 
-export const rulesApi = {
-  list: () => request<RouteRule[]>("/api/rules/"),
-  create: (data: RuleCreateInput) =>
-    request<RouteRule>("/api/rules/", {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
-  update: (id: string, data: Partial<RuleCreateInput>) =>
-    request<RouteRule>(`/api/rules/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    }),
-  delete: (id: string) =>
-    request<void>(`/api/rules/${id}`, { method: "DELETE" }),
-};
-
-// ── Messages (for demo/testing) ───────────────────────────────────
-
-export const messagesApi = {
-  send: (content: string, model = "auto") =>
-    request<{
-      id: string;
-      model: string;
-      content: { type: string; text: string }[];
-      usage: { input_tokens: number; output_tokens: number };
-    }>("/v1/messages", {
-      method: "POST",
-      body: JSON.stringify({
-        model,
-        messages: [{ role: "user", content }],
-        max_tokens: 1024,
-      }),
-    }),
+export const proxyApi = {
+  getCurrent: () => request<ProxyCurrent>("/api/proxy/current"),
+  activate: (providerId: string) =>
+    request<{ success: boolean; provider_name: string; message: string }>(
+      `/api/proxy/activate/${providerId}`,
+      { method: "POST" }
+    ),
+  getHealth: () => request<ProxyHealth>("/api/proxy/health"),
 };

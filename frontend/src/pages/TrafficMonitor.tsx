@@ -128,54 +128,54 @@ export default function TrafficMonitor() {
 
   const modelColumns = [
     { title: t("traffic.model"), dataIndex: "model", key: "model", width: 160,
-      render: (m: string) => <Text strong style={{ color: "#374151", fontSize: 13 }}>{m}</Text> },
+      render: (m: string) => <Text strong style={{ color: "var(--text-primary)", fontSize: 13 }}>{m}</Text> },
     { title: t("traffic.requests"), dataIndex: "requests", key: "requests", width: 70,
-      render: (v: number) => <Text style={{ color: "#374151" }}>{v}</Text> },
+      render: (v: number) => <Text style={{ color: "var(--text-primary)" }}>{v}</Text> },
     { title: "Input", dataIndex: "input_tokens", key: "it", width: 90,
-      render: (v: number) => <Text style={{ color: "#6366f1" }}>{fmt(v)}</Text> },
+      render: (v: number) => <Text style={{ color: "var(--accent)" }}>{fmt(v)}</Text> },
     { title: "Output", dataIndex: "output_tokens", key: "ot", width: 90,
-      render: (v: number) => <Text style={{ color: "#10b981" }}>{fmt(v)}</Text> },
+      render: (v: number) => <Text style={{ color: "var(--green)" }}>{fmt(v)}</Text> },
     { title: t("traffic.cacheHit"), dataIndex: "cache_read_tokens", key: "crt", width: 85,
-      render: (v: number) => <Text style={{ color: v > 0 ? "#8b5cf6" : "#d1d5db" }}>{v > 0 ? fmt(v) : "—"}</Text> },
+      render: (v: number) => <Text style={{ color: v > 0 ? "var(--accent-light)" : "var(--text-muted)" }}>{v > 0 ? fmt(v) : "—"}</Text> },
     { title: t("traffic.cost"), dataIndex: "cost_usd", key: "cost", width: 90,
-      render: (v: number) => <Text strong style={{ color: "#f59e0b" }}>${v.toFixed(4)}</Text> },
+      render: (v: number) => <Text strong style={{ color: "var(--orange)" }}>${v.toFixed(4)}</Text> },
   ];
 
   const recentColumns = [
     { title: t("traffic.time"), dataIndex: "time", key: "time", width: 135,
-      render: (v: string) => <Text style={{ color: "#9ca3af", fontSize: 12 }}>{v.substring(0, 16)}</Text> },
+      render: (v: string) => <Text style={{ color: "var(--text-muted)", fontSize: 12 }}>{v.substring(0, 16)}</Text> },
     { title: t("traffic.model"), dataIndex: "model", key: "model", width: 150,
       render: (m: string) => <Tag color="purple" style={{ fontSize: 11 }}>{m}</Tag> },
     { title: "In", dataIndex: "input_tokens", key: "in", width: 60,
-      render: (v: number) => <Text style={{ color: "#6366f1", fontSize: 12 }}>{fmt(v)}</Text> },
+      render: (v: number) => <Text style={{ color: "var(--accent)", fontSize: 12 }}>{fmt(v)}</Text> },
     { title: "Out", dataIndex: "output_tokens", key: "out", width: 60,
-      render: (v: number) => <Text style={{ color: "#10b981", fontSize: 12 }}>{fmt(v)}</Text> },
+      render: (v: number) => <Text style={{ color: "var(--green)", fontSize: 12 }}>{fmt(v)}</Text> },
     { title: t("traffic.cost"), dataIndex: "cost_usd", key: "cost", width: 85,
-      render: (v: number) => <Text style={{ color: "#f59e0b", fontSize: 12 }}>${v.toFixed(6)}</Text> },
+      render: (v: number) => <Text style={{ color: "var(--orange)", fontSize: 12 }}>${v.toFixed(6)}</Text> },
     { title: t("traffic.latency"), dataIndex: "latency_ms", key: "lat", width: 70,
-      render: (v: number) => <Text style={{ color: "#6b7280", fontSize: 12 }}>{v ? `${v}ms` : "—"}</Text> },
+      render: (v: number) => <Text style={{ color: "var(--text-secondary)", fontSize: 12 }}>{v ? `${v}ms` : "—"}</Text> },
     { title: "Status", dataIndex: "status_code", key: "status", width: 65,
       render: (v: number) => <Tag color={v === 200 ? "green" : "red"} style={{ fontSize: 11 }}>{v}</Tag> },
   ];
 
   const latencyColumns = [
     { title: t("traffic.model"), dataIndex: "model", key: "model", width: 140,
-      render: (m: string) => <Text style={{ color: "#374151", fontSize: 12 }}>{m}</Text> },
+      render: (m: string) => <Text style={{ color: "var(--text-primary)", fontSize: 12 }}>{m}</Text> },
     { title: t("traffic.requests"), dataIndex: "requests", key: "requests", width: 65,
-      render: (v: number) => <Text style={{ color: "#374151", fontSize: 12 }}>{v}</Text> },
+      render: (v: number) => <Text style={{ color: "var(--text-primary)", fontSize: 12 }}>{v}</Text> },
     { title: t("traffic.avgLatency"), dataIndex: "avg_ms", key: "avg", width: 80,
-      render: (v: number) => <Text strong style={{ color: "#6366f1", fontSize: 12 }}>{v}ms</Text> },
+      render: (v: number) => <Text strong style={{ color: "var(--accent)", fontSize: 12 }}>{v}ms</Text> },
     { title: t("traffic.minLatency"), dataIndex: "min_ms", key: "min", width: 70,
-      render: (v: number) => <Text style={{ color: "#10b981", fontSize: 12 }}>{v}ms</Text> },
+      render: (v: number) => <Text style={{ color: "var(--green)", fontSize: 12 }}>{v}ms</Text> },
     { title: t("traffic.maxLatency"), dataIndex: "max_ms", key: "max", width: 75,
-      render: (v: number) => <Text style={{ color: v > 5000 ? "#ef4444" : "#f59e0b", fontSize: 12 }}>{v}ms</Text> },
+      render: (v: number) => <Text style={{ color: v > 5000 ? "var(--red)" : "var(--orange)", fontSize: 12 }}>{v}ms</Text> },
   ];
 
   return (
     <div style={{ padding: 20 }}>
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-        <Title level={4} style={{ color: "#374151", margin: 0 }}>
+        <Title level={4} style={{ color: "var(--text-primary)", margin: 0 }}>
           <BarChartOutlined style={{ marginRight: 8 }} />
           {t("traffic.title")}
           <PageHelp page="traffic" />
@@ -184,12 +184,12 @@ export default function TrafficMonitor() {
           </Text>
         </Title>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <Text style={{ fontSize: 11, color: "#9ca3af" }}>
+          <Text style={{ fontSize: 11, color: "var(--text-muted)" }}>
             {t("traffic.autoRefresh")}
           </Text>
           <Switch size="small" checked={autoRefresh} onChange={setAutoRefresh} />
           <ReloadOutlined
-            style={{ color: "#6366f1", cursor: "pointer", fontSize: 16 }}
+            style={{ color: "var(--accent)", cursor: "pointer", fontSize: 16 }}
             onClick={fetchAll}
             title={t("traffic.refresh") || "Refresh"}
           />
@@ -199,24 +199,24 @@ export default function TrafficMonitor() {
       {/* Overview cards */}
       <Row gutter={[12, 12]}>
         {[
-          { label: t("traffic.todayRequests"), value: overview?.today.requests ?? 0, color: "#6366f1" },
-          { label: t("traffic.todayTokens"), value: ((overview?.today.input_tokens ?? 0) + (overview?.today.output_tokens ?? 0)), color: "#10b981", fmt: true },
-          { label: t("traffic.todayCost"), value: overview?.today.cost_usd ?? 0, color: "#f59e0b", prefix: "$", precision: 4 },
-          { label: t("traffic.cacheHit"), value: cacheToday, color: "#8b5cf6", fmt: true,
+          { label: t("traffic.todayRequests"), value: overview?.today.requests ?? 0, color: "var(--accent)" },
+          { label: t("traffic.todayTokens"), value: ((overview?.today.input_tokens ?? 0) + (overview?.today.output_tokens ?? 0)), color: "var(--green)", fmt: true },
+          { label: t("traffic.todayCost"), value: overview?.today.cost_usd ?? 0, color: "var(--orange)", prefix: "$", precision: 4 },
+          { label: t("traffic.cacheHit"), value: cacheToday, color: "var(--accent-light)", fmt: true,
             extra: cacheToday > 0 ? `${cacheHitToday}%` : undefined },
-          { label: t("traffic.totalCost"), value: overview?.total.cost_usd ?? 0, color: "#374151", prefix: "$", precision: 2 },
-          { label: t("traffic.totalRequests"), value: overview?.total.requests ?? 0, color: "#8b5cf6" },
+          { label: t("traffic.totalCost"), value: overview?.total.cost_usd ?? 0, color: "var(--text-primary)", prefix: "$", precision: 2 },
+          { label: t("traffic.totalRequests"), value: overview?.total.requests ?? 0, color: "var(--accent-light)" },
           { label: t("traffic.totalTokens"), value: ((overview?.total.input_tokens ?? 0) + (overview?.total.output_tokens ?? 0)), color: "#06b6d4", fmt: true },
           { label: t("traffic.totalCacheHit"), value: cacheTotal, color: "#a78bfa", fmt: true },
         ].map((card, i) => (
           <Col xs={12} sm={8} md={6} lg={3} key={i}>
-            <Card bordered={false} style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: 10 }}>
+            <Card bordered={false} style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: 10 }}>
               <Statistic
-                title={<span style={{ color: "#6b7280", fontSize: 11, fontWeight: 500 }}>{card.label}</span>}
+                title={<span style={{ color: "var(--text-secondary)", fontSize: 11, fontWeight: 500 }}>{card.label}</span>}
                 value={card.fmt ? fmt(card.value) : card.value}
                 precision={card.precision}
                 prefix={card.prefix}
-                suffix={card.extra ? <Text style={{ fontSize: 10, color: "#8b5cf6" }}>{card.extra}</Text> : undefined}
+                suffix={card.extra ? <Text style={{ fontSize: 10, color: "var(--accent-light)" }}>{card.extra}</Text> : undefined}
                 valueStyle={{ color: card.color, fontSize: 20, fontWeight: 700 }}
               />
             </Card>
@@ -236,11 +236,11 @@ export default function TrafficMonitor() {
           bodyStyle={{ padding: "10px 16px" }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <WarningOutlined style={{ color: errors.error_rate > 5 ? "#ef4444" : "#f59e0b", fontSize: 16 }} />
-            <Text strong style={{ color: "#374151", fontSize: 13 }}>
+            <WarningOutlined style={{ color: errors.error_rate > 5 ? "var(--red)" : "var(--orange)", fontSize: 16 }} />
+            <Text strong style={{ color: "var(--text-primary)", fontSize: 13 }}>
               {t("traffic.errorRate")}: {errors.error_rate}% ({errors.errors}/{errors.total})
             </Text>
-            <Text style={{ color: "#6b7280", fontSize: 12 }}>
+            <Text style={{ color: "var(--text-secondary)", fontSize: 12 }}>
               {t("traffic.lastHours", { hours: errors.hours })}
             </Text>
             {errors.by_status.map(s => (
@@ -256,9 +256,9 @@ export default function TrafficMonitor() {
       <Row style={{ marginTop: 12 }}>
         <Col span={24}>
           <Card
-            title={<span style={{ color: "#374151", fontSize: 14, fontWeight: 600 }}>{t("traffic.dailyTrend")}</span>}
+            title={<span style={{ color: "var(--text-primary)", fontSize: 14, fontWeight: 600 }}>{t("traffic.dailyTrend")}</span>}
             bordered={false}
-            style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: 10 }}
+            style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: 10 }}
           >
             {trend.length === 0 ? (
               <Text type="secondary">{t("traffic.noTrendData")}</Text>
@@ -267,29 +267,29 @@ export default function TrafficMonitor() {
                 <ComposedChart data={trend}>
                   <defs>
                     <linearGradient id="trafficGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.15} />
-                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                      <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.15} />
+                      <stop offset="95%" stopColor="var(--accent)" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="tokenGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.15} />
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                      <stop offset="5%" stopColor="var(--green)" stopOpacity={0.15} />
+                      <stop offset="95%" stopColor="var(--green)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-                  <XAxis dataKey="date" stroke="#9ca3af" fontSize={11} tickLine={false} />
-                  <YAxis yAxisId="left" stroke="#9ca3af" fontSize={11} tickLine={false}
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--bg-elevated)" />
+                  <XAxis dataKey="date" stroke="var(--text-muted)" fontSize={11} tickLine={false} />
+                  <YAxis yAxisId="left" stroke="var(--text-muted)" fontSize={11} tickLine={false}
                     tickFormatter={(v: number) => `$${v.toFixed(2)}`} />
-                  <YAxis yAxisId="right" orientation="right" stroke="#9ca3af" fontSize={11} tickLine={false}
+                  <YAxis yAxisId="right" orientation="right" stroke="var(--text-muted)" fontSize={11} tickLine={false}
                     tickFormatter={(v: number) => fmt(v)} />
-                  <Tooltip contentStyle={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: 8 }}
+                  <Tooltip contentStyle={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: 8 }}
                     formatter={(v: any, name: string) => {
                       if (name === "cost_usd") return [`$${Number(v).toFixed(6)}`, t("traffic.cost")];
                       if (name === "tokens") return [fmt(Number(v)), "Tokens"];
                       return [fmt(Number(v)), t("traffic.requests")];
                     }} />
                   <Legend />
-                  <Bar yAxisId="right" dataKey="requests" fill="#e5e7eb" radius={[4, 4, 0, 0]} name={t("traffic.requests")} />
-                  <Area yAxisId="left" type="monotone" dataKey="cost_usd" stroke="#6366f1" strokeWidth={2}
+                  <Bar yAxisId="right" dataKey="requests" fill="var(--border-light)" radius={[4, 4, 0, 0]} name={t("traffic.requests")} />
+                  <Area yAxisId="left" type="monotone" dataKey="cost_usd" stroke="var(--accent)" strokeWidth={2}
                     fill="url(#trafficGrad)" name="cost_usd" />
                 </ComposedChart>
               </ResponsiveContainer>
@@ -302,9 +302,9 @@ export default function TrafficMonitor() {
       <Row gutter={[12, 12]} style={{ marginTop: 12 }}>
         <Col xs={24} lg={10}>
           <Card
-            title={<span style={{ color: "#374151", fontSize: 14, fontWeight: 600 }}>{t("traffic.byModel")}</span>}
+            title={<span style={{ color: "var(--text-primary)", fontSize: 14, fontWeight: 600 }}>{t("traffic.byModel")}</span>}
             bordered={false}
-            style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: 10, height: "100%" }}
+            style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: 10, height: "100%" }}
             bodyStyle={{ padding: "4px 0" }}
           >
             <Table dataSource={models} columns={modelColumns} rowKey="model" size="small"
@@ -314,9 +314,9 @@ export default function TrafficMonitor() {
         </Col>
         <Col xs={24} lg={14}>
           <Card
-            title={<span style={{ color: "#374151", fontSize: 14, fontWeight: 600 }}>{t("traffic.recentRequests")}</span>}
+            title={<span style={{ color: "var(--text-primary)", fontSize: 14, fontWeight: 600 }}>{t("traffic.recentRequests")}</span>}
             bordered={false}
-            style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: 10, height: "100%" }}
+            style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: 10, height: "100%" }}
             bodyStyle={{ padding: "4px 0" }}
           >
             <Table dataSource={recent} columns={recentColumns} rowKey={(r, i) => `${r.time}-${i}`}
@@ -333,13 +333,13 @@ export default function TrafficMonitor() {
           <Col span={24}>
             <Card
               title={
-                <span style={{ color: "#374151", fontSize: 14, fontWeight: 600 }}>
+                <span style={{ color: "var(--text-primary)", fontSize: 14, fontWeight: 600 }}>
                   <ClockCircleOutlined style={{ marginRight: 6 }} />
                   {t("traffic.latencyStats")} (24h)
                 </span>
               }
               bordered={false}
-              style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: 10 }}
+              style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: 10 }}
               bodyStyle={{ padding: "4px 0" }}
             >
               <Table dataSource={latency} columns={latencyColumns} rowKey="model"

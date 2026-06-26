@@ -8,8 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from database import init_db, SessionLocal
 from logger import setup_logging, get_logger, request_logger
-from models import seed_demo_data
-from routers import messages, dashboard, rules, ccswitch, traffic, proxy, setup
+from models import seed_demo_data, seed_intent_tree
+from routers import dashboard, ccswitch, traffic, setup, intent, proxy_router, monitor
 
 # ── Init logging ───────────────────────────────────────────────────
 setup_logging()
@@ -23,9 +23,18 @@ async def lifespan(app: FastAPI):
     db = SessionLocal()
     try:
         seed_demo_data(db)
+        seed_intent_tree(db)
         log.info("Database initialized with demo data")
     finally:
         db.close()
+
+    # Ensure RAgent Proxy is active on startup so Claude Code routes through us
+    try:
+        from routers.proxy_router import ensure_proxy_active
+        ensure_proxy_active()
+    except Exception as e:
+        log.warning("Failed to activate RAgent Proxy: %s", e)
+
     yield
     log.info("Shutting down RAgent Router")
 
@@ -49,6 +58,8 @@ app.add_middleware(
         "x-ragent-provider",
         "x-ragent-rule",
         "x-ragent-reason",
+        "x-ragent-proxy",
+        "x-ragent-proxy-url",
     ],
 )
 
@@ -85,13 +96,13 @@ async def log_requests(request: Request, call_next):
 
 
 # Register routers
-app.include_router(messages.router)
 app.include_router(dashboard.router)
-app.include_router(rules.router)
 app.include_router(ccswitch.router)
 app.include_router(traffic.router)
-app.include_router(proxy.router)
 app.include_router(setup.router)
+app.include_router(intent.router)
+app.include_router(proxy_router.router)
+app.include_router(monitor.router)
 
 
 @app.get("/health")
@@ -102,4 +113,4 @@ def health():
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("main:app", host="0.0.0.0", port=15722, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=15722)

@@ -17,7 +17,7 @@ export default function RecentRoutes() {
       key: "prompt",
       ellipsis: true,
       width: 240,
-      render: (text: string) => <Text style={{ color: "#374151", fontSize: 13 }}>{text}</Text>,
+      render: (text: string) => <Text style={{ color: "var(--text-primary)", fontSize: 13 }}>{text}</Text>,
     },
     {
       title: t("dashboard.model"),
@@ -36,21 +36,21 @@ export default function RecentRoutes() {
       key: "route_reason",
       ellipsis: true,
       width: 180,
-      render: (text: string) => <Text style={{ color: "#6b7280", fontSize: 12 }}>{text}</Text>,
+      render: (text: string) => <Text style={{ color: "var(--text-secondary)", fontSize: 12 }}>{text}</Text>,
     },
     {
       title: t("dashboard.cost"),
       dataIndex: "cost_usd",
       key: "cost_usd",
       width: 80,
-      render: (val: number) => <Text style={{ color: "#10b981", fontSize: 13 }}>${val.toFixed(4)}</Text>,
+      render: (val: number) => <Text style={{ color: "var(--green)", fontSize: 13 }}>${val.toFixed(4)}</Text>,
     },
     {
       title: t("dashboard.latency"),
       dataIndex: "latency_ms",
       key: "latency_ms",
       width: 80,
-      render: (val: number) => <Text style={{ color: "#6b7280", fontSize: 13 }}>{val}ms</Text>,
+      render: (val: number) => <Text style={{ color: "var(--text-secondary)", fontSize: 13 }}>{val}ms</Text>,
     },
     {
       title: t("dashboard.time"),
@@ -58,18 +58,18 @@ export default function RecentRoutes() {
       key: "created_at",
       width: 140,
       render: (val: string) => (
-        <Text style={{ color: "#9ca3af", fontSize: 12 }}>{new Date(val).toLocaleString()}</Text>
+        <Text style={{ color: "var(--text-muted)", fontSize: 12 }}>{new Date(val).toLocaleString()}</Text>
       ),
     },
   ];
 
   return (
     <Card
-      title={<span style={{ color: "#374151", fontSize: 14, fontWeight: 600 }}>{t("dashboard.recentRoutes")}</span>}
+      title={<span style={{ color: "var(--text-primary)", fontSize: 14, fontWeight: 600 }}>{t("dashboard.recentRoutes")}</span>}
       bordered={false}
       style={{
-        background: "#ffffff",
-        border: "1px solid #e5e7eb",
+        background: "var(--bg-card)",
+        border: "1px solid var(--border-light)",
         borderRadius: 10,
         height: "100%",
       }}

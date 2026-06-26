@@ -50,7 +50,9 @@ export default function SetupBanner() {
         localStorage.setItem(SETUP_DONE_KEY, "true");
         setStatus(prev => prev ? { ...prev, proxy_configured: true } : null);
         message.success(
-          lang === "zh" ? "配置成功！Claude Code 将通过 RAgent Router 转发" : "Setup complete! Claude Code now routes through RAgent Router"
+          lang === "zh"
+            ? "配置成功！CC Switch 已添加 RAgent Proxy，请在 CC Switch 中激活它以将 Claude Code 路由到 RAgent Router（仅需一次）"
+            : "Setup complete! RAgent Proxy added to CC Switch. Activate it in CC Switch to route Claude Code through RAgent Router (one-time only)."
         );
       } else {
         message.error(data.detail || "Setup failed");
@@ -92,8 +94,8 @@ export default function SetupBanner() {
 
   if (loading) {
     return (
-      <div style={{ padding: "8px 20px", background: "#fff3cd", borderBottom: "1px solid #ffc107" }}>
-        <Spin size="small" /> <Text style={{ color: "#856404", fontSize: 12 }}>
+      <div style={{ padding: "8px 20px", background: "var(--bg-elevated)", borderBottom: "1px solid var(--border-light)" }}>
+        <Spin size="small" /> <Text style={{ color: "var(--text-secondary)", fontSize: 12 }}>
           {lang === "zh" ? "正在检查配置..." : "Checking configuration..."}
         </Text>
       </div>
@@ -113,8 +115,8 @@ export default function SetupBanner() {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
             <span style={{ fontSize: 13 }}>
               {lang === "zh"
-                ? "检测到您是第一次使用 RAgent Router，需要配置 CC Switch 才能正常工作。"
-                : "First-time setup: CC Switch needs to be configured for RAgent Router to work."}
+                ? "首次使用需在 CC Switch 中添加 RAgent Proxy（一键完成），激活后 Claude Code 通过 RAgent Router 转发，此后切换供应商即时生效、零重启。"
+                : "First-time setup: add RAgent Proxy to CC Switch (one-click). Once active in CC Switch, Claude Code routes through RAgent Router — all future provider switches are instant, zero restart."}
             </span>
             <Space size={8}>
               <Button size="small" onClick={handleDismiss}>
@@ -128,7 +130,6 @@ export default function SetupBanner() {
         }
         style={{
           borderRadius: 0, borderLeft: "none", borderRight: "none",
-          background: "#fffbeb", borderColor: "#fde68a",
         }}
       />
     );
@@ -145,8 +146,8 @@ export default function SetupBanner() {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
             <span style={{ fontSize: 13 }}>
               {lang === "zh"
-                ? `配置完成！Claude Code 请求通过 RAgent Router (${status.proxy_base_url}) 转发。`
-                : `Setup complete! Claude Code routes through RAgent Router (${status.proxy_base_url}).`}
+                ? `配置完成！RAgent Proxy 已添加到 CC Switch。在 CC Switch 中激活后，Claude Code 通过 ${status.proxy_base_url} 转发（可能需要重启 Claude Code 一次，之后所有切换即时生效）。`
+                : `Setup done! RAgent Proxy added to CC Switch. After activating in CC Switch, Claude Code routes through ${status.proxy_base_url}. (May need to restart Claude Code once — after that, all switching is instant.)`}
             </span>
             <Space size={8}>
               <Button size="small" onClick={handleDismiss}>
@@ -167,7 +168,6 @@ export default function SetupBanner() {
         }
         style={{
           borderRadius: 0, borderLeft: "none", borderRight: "none",
-          background: "#f0fdf4", borderColor: "#bbf7d0",
         }}
       />
     );

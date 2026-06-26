@@ -12,11 +12,11 @@ export default function CostTrend() {
 
   return (
     <Card
-      title={<span style={{ color: "#374151", fontSize: 14, fontWeight: 600 }}>{t("dashboard.costTrend")}</span>}
+      title={<span style={{ color: "var(--text-primary)", fontSize: 14, fontWeight: 600 }}>{t("dashboard.costTrend")}</span>}
       bordered={false}
       style={{
-        background: "#ffffff",
-        border: "1px solid #e5e7eb",
+        background: "var(--bg-card)",
+        border: "1px solid var(--border-light)",
         borderRadius: 10,
       }}
     >
@@ -27,14 +27,14 @@ export default function CostTrend() {
           <AreaChart data={costTrend}>
             <defs>
               <linearGradient id="costGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.15} />
-                <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.15} />
+                <stop offset="95%" stopColor="var(--accent)" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-            <XAxis dataKey="date" stroke="#9ca3af" fontSize={12} tickLine={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--bg-elevated)" />
+            <XAxis dataKey="date" stroke="var(--text-muted)" fontSize={12} tickLine={false} />
             <YAxis
-              stroke="#9ca3af"
+              stroke="var(--text-muted)"
               fontSize={12}
               tickLine={false}
               domain={[0, Math.ceil(maxCost * 1.2 * 100) / 100]}
@@ -42,10 +42,10 @@ export default function CostTrend() {
             />
             <Tooltip
               contentStyle={{
-                background: "#fff",
-                border: "1px solid #e5e7eb",
+                background: "var(--bg-card)",
+                border: "1px solid var(--border-light)",
                 borderRadius: 8,
-                color: "#374151",
+                color: "var(--text-primary)",
               }}
               formatter={(value: number, name: string) => {
                 if (name === "cost") return [`$${value.toFixed(4)}`, t("dashboard.costAxis") as string];
@@ -53,8 +53,8 @@ export default function CostTrend() {
               }}
               labelFormatter={(label: string) => `${t("dashboard.date")}: ${label}`}
             />
-            <Area type="monotone" dataKey="cost" stroke="#6366f1" strokeWidth={2} fill="url(#costGradient)" name="cost" />
-            <Line type="monotone" dataKey="requests" stroke="#10b981" strokeWidth={1.5} strokeDasharray="4 4" dot={{ r: 3, fill: "#10b981" }} name="requests" />
+            <Area type="monotone" dataKey="cost" stroke="var(--accent)" strokeWidth={2} fill="url(#costGradient)" name="cost" />
+            <Line type="monotone" dataKey="requests" stroke="var(--green)" strokeWidth={1.5} strokeDasharray="4 4" dot={{ r: 3, fill: "var(--green)" }} name="requests" />
           </AreaChart>
         </ResponsiveContainer>
       )}

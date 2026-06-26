@@ -31,7 +31,7 @@ export default function TitleBar() {
     height: 38,
     border: "none",
     background: "transparent",
-    color: "#9ca3af",
+    color: "var(--text-muted)",
     cursor: "pointer",
     display: "flex",
     alignItems: "center",
@@ -46,8 +46,8 @@ export default function TitleBar() {
       className="titlebar-drag"
       style={{
         height: 38,
-        background: "#ffffff",
-        borderBottom: "1px solid #e5e7eb",
+        background: "var(--bg-primary)",
+        borderBottom: "1px solid var(--border-light)",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
@@ -73,7 +73,7 @@ export default function TitleBar() {
         >
           R
         </div>
-        <span style={{ color: "#374151", fontSize: 12, fontWeight: 600, letterSpacing: "-0.2px" }}>
+        <span style={{ color: "var(--text-primary)", fontSize: 12, fontWeight: 600, letterSpacing: "-0.2px" }}>
           {t("app.title")}
         </span>
         <span
@@ -81,7 +81,7 @@ export default function TitleBar() {
             width: 6,
             height: 6,
             borderRadius: "50%",
-            background: backendOnline ? "#10b981" : "#ef4444",
+            background: backendOnline ? "var(--green)" : "var(--red)",
             transition: "background 0.3s",
           }}
           title={backendOnline ? t("titlebar.backendOnline") : t("titlebar.backendOffline")}
@@ -100,12 +100,12 @@ export default function TitleBar() {
             width: 36,
             fontSize: 11,
             fontWeight: 600,
-            color: "#6b7280",
-            background: langOpen ? "#f3f4f6" : "transparent",
+            color: "var(--text-secondary)",
+            background: langOpen ? "var(--bg-elevated)" : "transparent",
             borderRadius: 6,
           }}
           onMouseEnter={(e) => {
-            if (!langOpen) e.currentTarget.style.background = "#f3f4f6";
+            if (!langOpen) e.currentTarget.style.background = "var(--bg-elevated)";
           }}
           onMouseLeave={(e) => {
             if (!langOpen) e.currentTarget.style.background = "transparent";
@@ -125,10 +125,10 @@ export default function TitleBar() {
                 position: "absolute",
                 top: 40,
                 right: 0,
-                background: "#fff",
-                border: "1px solid #e5e7eb",
+                background: "var(--bg-card)",
+                border: "1px solid var(--border-light)",
                 borderRadius: 8,
-                boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+                boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
                 zIndex: 200,
                 overflow: "hidden",
                 minWidth: 120,
@@ -146,8 +146,8 @@ export default function TitleBar() {
                     width: "100%",
                     padding: "8px 14px",
                     border: "none",
-                    background: currentLang === item.key ? "#eef2ff" : "transparent",
-                    color: currentLang === item.key ? "#6366f1" : "#374151",
+                    background: currentLang === item.key ? "var(--bg-active)" : "transparent",
+                    color: currentLang === item.key ? "var(--accent)" : "var(--text-primary)",
                     cursor: "pointer",
                     fontSize: 12,
                     textAlign: "left",
@@ -155,7 +155,7 @@ export default function TitleBar() {
                     fontWeight: currentLang === item.key ? 600 : 400,
                   }}
                   onMouseEnter={(e) => {
-                    if (currentLang !== item.key) e.currentTarget.style.background = "#f9fafb";
+                    if (currentLang !== item.key) e.currentTarget.style.background = "var(--bg-secondary)";
                   }}
                   onMouseLeave={(e) => {
                     if (currentLang !== item.key) e.currentTarget.style.background = "transparent";
@@ -174,7 +174,7 @@ export default function TitleBar() {
         <button
           style={btnBase}
           onClick={() => api?.minimize()}
-          onMouseEnter={(e) => (e.currentTarget.style.background = "#f3f4f6")}
+          onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-elevated)")}
           onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
           title={t("titlebar.minimize")}
         >
@@ -186,7 +186,7 @@ export default function TitleBar() {
         <button
           style={btnBase}
           onClick={() => api?.maximize()}
-          onMouseEnter={(e) => (e.currentTarget.style.background = "#f3f4f6")}
+          onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-elevated)")}
           onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
           title={maximized ? t("titlebar.restore") : t("titlebar.maximize")}
         >
@@ -203,7 +203,7 @@ export default function TitleBar() {
         </button>
 
         <button
-          style={{ ...btnBase, color: "#9ca3af" }}
+          style={{ ...btnBase, color: "var(--text-muted)" }}
           onClick={() => api?.close()}
           onMouseEnter={(e) => {
             e.currentTarget.style.background = "#ef4444";

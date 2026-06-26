@@ -8,7 +8,10 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from models import RequestLog
-from services.provider_adapter import COST_RATES
+COST_RATES = {
+    "claude": {"input": 3.0, "output": 15.0},
+    "deepseek": {"input": 0.27, "output": 1.10},
+}
 
 req_logger = logging.getLogger("ragent.request")
 

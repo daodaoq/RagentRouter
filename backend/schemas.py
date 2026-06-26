@@ -9,17 +9,29 @@ from pydantic import BaseModel, Field
 # ── Anthropic-compatible Messages API ──────────────────────────────
 
 class ContentBlock(BaseModel):
-    type: Literal["text", "tool_use", "tool_result", "image"]
+    """Lenient content block — proxy passes through whatever fields the client sends."""
+    type: str = "text"
     text: str | None = None
+
+    class Config:
+        extra = "allow"
 
 
 class Message(BaseModel):
-    role: Literal["user", "assistant"]
-    content: str | list[ContentBlock]
+    """Lenient message — accepts any role the client sends (user/assistant/system)."""
+    role: str
+    content: str | list[dict] | None = None
+
+    class Config:
+        extra = "allow"
 
 
 class MessagesRequest(BaseModel):
-    """Anthropic Messages API compatible request body."""
+    """Anthropic Messages API compatible request body.
+
+    Uses lenient validation — as a transparent proxy, RAgent Router
+    forwards whatever the client sends without strict schema checks.
+    """
 
     model: str = "auto"
     messages: list[Message]
@@ -31,6 +43,9 @@ class MessagesRequest(BaseModel):
     top_k: int | None = None
     metadata: dict | None = None
     stop_sequences: list[str] | None = None
+
+    class Config:
+        extra = "allow"
 
 
 class Usage(BaseModel):
@@ -98,35 +113,3 @@ class CostTrendOut(BaseModel):
     points: list[CostTrendPoint]
 
 
-# ── Rules ──────────────────────────────────────────────────────────
-
-class RuleIn(BaseModel):
-    name: str
-    description: str = ""
-    keywords: list[str] = []
-    target_model: str = "deepseek"
-    priority: int = 0
-    enabled: bool = True
-
-
-class RuleOut(BaseModel):
-    id: str
-    name: str
-    description: str
-    keywords: list[str]
-    target_model: str
-    priority: int
-    enabled: bool
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
-
-
-class RuleUpdateIn(BaseModel):
-    name: str | None = None
-    description: str | None = None
-    keywords: list[str] | None = None
-    target_model: str | None = None
-    priority: int | None = None
-    enabled: bool | None = None

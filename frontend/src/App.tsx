@@ -4,12 +4,12 @@ import Sidebar from "./components/Sidebar";
 import StatusBar from "./components/StatusBar";
 import SetupBanner from "./components/SetupBanner";
 import TrafficMonitor from "./pages/TrafficMonitor";
-import RuleManager from "./components/RuleManager";
-import TestConsole from "./components/TestConsole";
 import Providers from "./components/Providers";
 import Settings from "./components/Settings";
+import IntentPanel from "./components/IntentPanel";
+import MonitorPanel from "./components/MonitorPanel";
 
-type Page = "providers" | "traffic" | "rules" | "test" | "settings";
+type Page = "providers" | "traffic" | "settings" | "intent" | "monitor";
 
 export default function App() {
   const [page, setPage] = useState<Page>("providers");
@@ -43,7 +43,7 @@ export default function App() {
         height: "100vh",
         width: "100vw",
         overflow: "hidden",
-        background: "#ffffff",
+        background: "var(--bg-primary)",
       }}
     >
       {/* Custom Title Bar */}
@@ -62,14 +62,14 @@ export default function App() {
             flex: 1,
             overflowX: "hidden",
             overflowY: "auto",
-            background: "#f8f9fa",
+            background: "var(--bg-secondary)",
             minWidth: 0,
           }}
         >
           {page === "providers" && <Providers />}
           {page === "traffic" && <TrafficMonitor />}
-          {page === "rules" && <RuleManager />}
-          {page === "test" && <TestConsole />}
+          {page === "intent" && <IntentPanel />}
+          {page === "monitor" && <MonitorPanel />}
           {page === "settings" && <Settings />}
         </div>
       </div>

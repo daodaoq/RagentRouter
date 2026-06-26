@@ -24,6 +24,7 @@
   --titlebar-height: 38px;
   --sidebar-width: 64px;
   --statusbar-height: 32px;
+  --bg-active: #eef2ff;
 }
 
 [data-theme="dark"] {
@@ -41,6 +42,7 @@
   --green: #34d399;
   --red: #f87171;
   --orange: #fbbf24;
+  --bg-active: #252845;
 }
 
 html, body, #root {

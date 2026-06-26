@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, Tag, Typography, Spin, Empty, Row, Col, Tooltip, Button, message, Alert } from "antd";
 import {
   ApiOutlined, LinkOutlined, CheckCircleFilled, ThunderboltOutlined,
+  ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import PageHelp from "./PageHelp";
@@ -35,23 +36,21 @@ export default function Providers() {
   const [dbStatus, setDbStatus] = useState<{ available: boolean; path: string; db_size_mb: number } | null>(null);
   const [activeId, setActiveId] = useState<string>("");
   const [activating, setActivating] = useState<string | null>(null);
-
   const fetchProviders = () => {
     fetch("http://localhost:15722/api/ccswitch/providers")
       .then(r => r.json())
       .then(data => {
-        setProviders((data.items || []).filter((p: Provider) => p.name !== "default"));
+        const items = (data.items || []).filter((p: Provider) => p.name !== "default");
+        setProviders(items);
+        // Find current provider from is_current flag
+        const current = items.find((p: Provider) => p.is_current);
+        if (current) setActiveId(current.id);
         setLoading(false);
       }).catch(() => setLoading(false));
   };
 
   useEffect(() => {
     fetchProviders();
-    // Get RAgent Router's own active provider (not CC Switch's)
-    fetch("http://localhost:15722/api/proxy/current")
-      .then(r => r.json())
-      .then(d => setActiveId(d.provider_id))
-      .catch(() => {});
     fetch("http://localhost:15722/api/ccswitch/status")
       .then(r => r.json()).then(setDbStatus).catch(() => {});
   }, []);
@@ -60,14 +59,14 @@ export default function Providers() {
     if (provider.id === activeId) return;
     setActivating(provider.id);
     try {
-      const res = await fetch(`http://localhost:15722/api/proxy/activate/${provider.id}`, { method: "POST" });
+      const res = await fetch(`http://localhost:15722/api/ccswitch/activate/${provider.id}`, { method: "POST" });
       const data = await res.json();
       if (data.success) {
         setActiveId(provider.id);
         message.success(
           lang === "zh"
-            ? `已切换到 ${data.provider_name} — 即时生效`
-            : `Switched to ${data.provider_name} — active now`
+            ? `已切换到 ${data.provider_name} — Claude Code 下个问题自动用新供应商`
+            : `Switched to ${data.provider_name} — next Claude Code request uses new provider`
         );
       } else {
         message.error(data.detail || data.message || "Failed");
@@ -84,7 +83,7 @@ export default function Providers() {
   return (
     <div style={{ padding: 20 }}>
       <div style={{ marginBottom: 20 }}>
-        <Title level={4} style={{ color: "#374151", marginBottom: 4 }}>
+        <Title level={4} style={{ color: "var(--text-primary)", marginBottom: 4 }}>
           <ApiOutlined style={{ marginRight: 8 }} />
           {lang === "zh" ? "API 供应商" : "API Providers"}
           <PageHelp page="providers" />
@@ -92,14 +91,14 @@ export default function Providers() {
         <Text type="secondary" style={{ fontSize: 12 }}>
           {lang === "zh" ? "数据来源: CC Switch 本地数据库" : "Data source: CC Switch local database"}
         </Text>
+
         <Alert
           type="success"
-          showIcon={false}
           icon={<ThunderboltOutlined />}
           message={lang === "zh"
-            ? "切换即时生效 — RAgent Router 直接转发请求到选中的供应商，无需重启任何程序。"
-            : "Instant switching — RAgent Router forwards requests directly to the selected provider. No restart needed."}
-          style={{ marginTop: 10, fontSize: 12, background: "#f0fdf4", border: "1px solid #bbf7d0" }}
+            ? "点击「启用」直接切换 Claude Code 供应商 — 下个问题自动生效，无需重启。"
+            : "Click 'Activate' to switch Claude Code provider — takes effect on the next question, no restart."}
+          style={{ marginTop: 10, fontSize: 12 }}
         />
       </div>
 
@@ -107,7 +106,7 @@ export default function Providers() {
         {providers.map(p => {
           const cat = CATEGORY_LABELS[p.category] || { en: p.category, zh: p.category, color: "default" };
           const appLabel = APP_TYPE_LABELS[p.app_type] || p.app_type;
-          const color = p.icon_color || "#6366f1";
+          const color = p.icon_color || "var(--accent)";
           const isActive = p.id === activeId;
 
           return (
@@ -115,7 +114,7 @@ export default function Providers() {
               <Card
                 bordered={false}
                 style={{
-                  background: "#fff",
+                  background: "var(--bg-card)",
                   border: isActive ? "2px solid #6366f1" : "1px solid #e5e7eb",
                   borderRadius: 10,
                   height: "100%",
@@ -130,7 +129,7 @@ export default function Providers() {
                     color: "#fff", fontSize: 16, fontWeight: 700, flexShrink: 0,
                   }}>{p.name.charAt(0)}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <Text strong style={{ color: "#374151", fontSize: 14 }}>{p.name}</Text>
+                    <Text strong style={{ color: "var(--text-primary)", fontSize: 14 }}>{p.name}</Text>
                     <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
                       <Tag style={{ fontSize: 10, lineHeight: "16px" }}>{appLabel}</Tag>
                       <Tag color={cat.color} style={{ fontSize: 10, lineHeight: "16px" }}>{cat[lang]}</Tag>
@@ -140,11 +139,11 @@ export default function Providers() {
 
                 {/* Endpoints */}
                 {p.endpoints.length > 0 && (
-                  <div style={{ background: "#f9fafb", borderRadius: 6, padding: "8px 10px", marginBottom: 12 }}>
+                  <div style={{ background: "var(--bg-secondary)", borderRadius: 6, padding: "8px 10px", marginBottom: 12 }}>
                     {p.endpoints.map((ep, i) => (
                       <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, padding: "3px 0", fontSize: 11 }}>
-                        <LinkOutlined style={{ color: "#9ca3af", fontSize: 10 }} />
-                        <Text style={{ color: "#6b7280", fontSize: 11, fontFamily: "monospace" }} ellipsis>{ep.url}</Text>
+                        <LinkOutlined style={{ color: "var(--text-muted)", fontSize: 10 }} />
+                        <Text style={{ color: "var(--text-secondary)", fontSize: 11, fontFamily: "monospace" }} ellipsis>{ep.url}</Text>
                       </div>
                     ))}
                   </div>
@@ -152,7 +151,7 @@ export default function Providers() {
 
                 {/* Footer */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 8 }}>
-                  <div style={{ fontSize: 11, color: "#9ca3af" }}>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
                     <span>{lang === "zh" ? "倍率" : "Multiplier"}: {p.cost_multiplier || "1.0"}x</span>
                   </div>
 
